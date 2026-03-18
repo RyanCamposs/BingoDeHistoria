@@ -1,0 +1,950 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bingo</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Serif:ital,wght@0,300;0,400;1,300&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg:       #f5f4f1;
+  --surface:  #ffffff;
+  --surface2: #f0efe9;
+  --border:   #dddbd5;
+  --border2:  #c8c5bc;
+  --text:     #1a1915;
+  --text2:    #6b6860;
+  --text3:    #a8a49c;
+  --green:    #2d5a3d;
+  --green-bg: #eef4f0;
+  --red:      #6b2424;
+  --red-bg:   #f9efef;
+  --rule:     1px solid var(--border);
+}
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'IBM Plex Sans', sans-serif;
+  font-weight: 400;
+  min-height: 100vh;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+/* ── HEADER ─────────────────────────────────────── */
+header {
+  border-bottom: var(--rule);
+  padding: 36px 40px 24px;
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+.header-left h1 {
+  font-family: 'IBM Plex Serif', serif;
+  font-size: 2.2rem;
+  font-weight: 300;
+  letter-spacing: 0.04em;
+  color: var(--text);
+  line-height: 1;
+}
+.header-left p {
+  margin-top: 5px;
+  font-size: 0.7rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--text3);
+}
+
+/* ── LAYOUT ─────────────────────────────────────── */
+.app {
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 32px 40px 60px;
+  display: grid;
+  grid-template-columns: 360px 1fr;
+  grid-template-rows: auto auto;
+  gap: 20px;
+}
+
+/* ── CARD BASE ───────────────────────────────────── */
+.card {
+  background: var(--surface);
+  border: var(--rule);
+  border-radius: 3px;
+}
+.card-head {
+  padding: 14px 20px;
+  border-bottom: var(--rule);
+}
+.card-head h2 {
+  font-size: 0.62rem;
+  font-weight: 500;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--text3);
+}
+
+/* ── SORTEIO ─────────────────────────────────────── */
+.sorteio-card { grid-column: 1; grid-row: 1; }
+
+.ball-row {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  padding: 24px 20px;
+  border-bottom: var(--rule);
+}
+.ball {
+  width: 80px; height: 80px;
+  border-radius: 50%;
+  border: 1px solid var(--border2);
+  background: var(--surface2);
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+  transition: border-color 0.3s;
+  position: relative;
+}
+.ball.active {
+  border-color: var(--text);
+  box-shadow: 0 0 0 3px var(--bg), 0 0 0 4px var(--text);
+}
+.ball-num {
+  font-family: 'IBM Plex Serif', serif;
+  font-size: 1.9rem;
+  font-weight: 300;
+  color: var(--text);
+  line-height: 1;
+}
+.ball-letter {
+  position: absolute;
+  bottom: 10px;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.55rem;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  color: var(--text3);
+}
+.ball-info { flex: 1; }
+.ball-info-label {
+  font-size: 0.62rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--text3);
+  margin-bottom: 2px;
+}
+.ball-info-num {
+  font-family: 'IBM Plex Serif', serif;
+  font-size: 1.5rem;
+  font-weight: 300;
+  color: var(--text);
+  line-height: 1;
+}
+
+.stats-bar {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  border-bottom: var(--rule);
+}
+.stat {
+  padding: 12px 16px;
+  text-align: center;
+  border-right: var(--rule);
+}
+.stat:last-child { border-right: none; }
+.stat-n {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 1.35rem;
+  font-weight: 500;
+  color: var(--text);
+  line-height: 1;
+}
+.stat-l {
+  font-size: 0.58rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--text3);
+  margin-top: 3px;
+}
+
+.controls {
+  padding: 16px 20px;
+  border-bottom: var(--rule);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.btn-row { display: flex; gap: 8px; flex-wrap: wrap; }
+
+/* ── BUTTONS ─────────────────────────────────────── */
+.btn {
+  padding: 8px 18px;
+  border-radius: 2px;
+  font-family: 'IBM Plex Sans', sans-serif;
+  font-size: 0.72rem;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: all 0.12s;
+  border: 1px solid transparent;
+  line-height: 1;
+  white-space: nowrap;
+}
+.btn-primary   { background: var(--text); color: var(--bg); border-color: var(--text); }
+.btn-primary:hover:not(:disabled) { opacity: 0.8; }
+.btn-primary:disabled { opacity: 0.25; cursor: not-allowed; }
+.btn-secondary { background: transparent; color: var(--text2); border-color: var(--border2); }
+.btn-secondary:hover { border-color: var(--text); color: var(--text); }
+.btn-ghost     { background: transparent; color: var(--text3); border-color: var(--border); }
+.btn-ghost:hover { color: var(--text2); border-color: var(--border2); }
+.btn-stop      { background: var(--red-bg); color: var(--red); border-color: #e0c0c0; }
+.btn-stop:hover { background: #f3dada; }
+.btn-confirm   { background: var(--green-bg); color: var(--green); border-color: #bcd4c6; }
+.btn-confirm:hover { background: #dceee4; }
+
+.speed-row {
+  display: flex; align-items: center; gap: 10px;
+}
+.speed-row label {
+  font-size: 0.62rem; letter-spacing: 0.14em;
+  text-transform: uppercase; color: var(--text3); white-space: nowrap;
+}
+input[type=range] {
+  -webkit-appearance: none; flex: 1; height: 2px;
+  background: var(--border2); border-radius: 1px; outline: none; max-width: 110px;
+}
+input[type=range]::-webkit-slider-thumb {
+  -webkit-appearance: none; width: 11px; height: 11px;
+  border-radius: 50%; background: var(--text); cursor: pointer;
+}
+.speed-lbl {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.7rem; color: var(--text2); min-width: 28px;
+}
+
+/* ── HISTÓRICO ───────────────────────────────────── */
+.history { padding: 14px 20px; }
+.section-label {
+  font-size: 0.58rem; letter-spacing: 0.2em;
+  text-transform: uppercase; color: var(--text3); margin-bottom: 10px;
+}
+.h-list {
+  display: flex; flex-wrap: wrap; gap: 4px;
+  max-height: 90px; overflow-y: auto;
+}
+.h-list::-webkit-scrollbar { width: 3px; }
+.h-list::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 2px; }
+.h-chip {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.7rem; font-weight: 400;
+  padding: 3px 7px; border-radius: 2px;
+  border: 1px solid var(--border); color: var(--text2);
+  background: var(--surface2);
+}
+.h-chip.new { background: var(--text); color: var(--bg); border-color: var(--text); }
+.h-empty { font-size: 0.7rem; color: var(--text3); }
+
+/* ── TABELA ──────────────────────────────────────── */
+.tabela-card { grid-column: 2; grid-row: 1 / 3; }
+
+.col-strip {
+  display: grid; grid-template-columns: repeat(5, 1fr);
+  padding: 10px 20px 0;
+}
+.col-tag {
+  text-align: center;
+  font-size: 0.58rem; letter-spacing: 0.16em;
+  text-transform: uppercase; color: var(--text3);
+  padding-bottom: 8px;
+  border-bottom: var(--rule);
+}
+
+.num-grid {
+  padding: 16px 20px;
+  display: grid;
+  grid-template-columns: repeat(15, 1fr);
+  gap: 3px;
+}
+.nc {
+  aspect-ratio: 1;
+  display: flex; align-items: center; justify-content: center;
+  border-radius: 2px;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.66rem;
+  color: var(--text3);
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  transition: all 0.22s;
+  cursor: default;
+}
+.nc.drawn {
+  background: var(--text); color: var(--bg);
+  border-color: var(--text); font-weight: 500;
+}
+.nc.drawn.latest {
+  outline: 2px solid var(--text2); outline-offset: 2px;
+}
+
+/* ── CARTELA ─────────────────────────────────────── */
+.cartela-card { grid-column: 1; grid-row: 2; }
+
+.cartela-actions {
+  padding: 12px 16px 10px;
+  border-bottom: var(--rule);
+  display: flex; gap: 8px; flex-wrap: wrap;
+}
+
+.bingo-table {
+  width: 100%; border-collapse: collapse;
+}
+.bingo-table thead th {
+  font-family: 'IBM Plex Serif', serif;
+  font-size: 1rem; font-weight: 300;
+  letter-spacing: 0.12em; color: var(--text);
+  padding: 10px 0; text-align: center;
+  border-bottom: 1.5px solid var(--border2);
+  border-right: var(--rule); width: 20%;
+}
+.bingo-table thead th:last-child { border-right: none; }
+.bingo-table tbody td {
+  text-align: center;
+  font-family: 'IBM Plex Serif', serif;
+  font-size: 1.05rem; font-weight: 300;
+  color: var(--text);
+  border-right: var(--rule); border-bottom: var(--rule);
+  cursor: pointer; transition: background 0.12s;
+}
+.bingo-table tbody td:last-child { border-right: none; }
+.bingo-table tbody tr:last-child td { border-bottom: none; }
+.ci { display: flex; align-items: center; justify-content: center; height: 50px; }
+.bingo-table tbody td:hover .ci { background: var(--surface2); }
+.bingo-table tbody td.free-cell { cursor: default; }
+.bingo-table tbody td.free-cell .ci {
+  background: var(--surface2);
+  font-family: 'IBM Plex Sans', sans-serif;
+  font-size: 0.55rem; letter-spacing: 0.12em;
+  text-transform: uppercase; color: var(--text3); font-weight: 500;
+}
+.bingo-table tbody td.free-cell:hover .ci { background: var(--surface2); }
+.bingo-table tbody td.marked .ci {
+  background: var(--text); color: var(--bg);
+}
+.bingo-table tbody td.marked:hover .ci { background: #333; }
+.bingo-table tbody td.winning .ci {
+  background: var(--green-bg); color: var(--green);
+  outline: 1.5px solid var(--green); outline-offset: -2px;
+}
+
+/* ── MODAIS ──────────────────────────────────────── */
+.overlay {
+  display: none; position: fixed; inset: 0;
+  background: rgba(26,25,21,0.45);
+  z-index: 100; align-items: center; justify-content: center;
+  padding: 20px; backdrop-filter: blur(3px);
+}
+.overlay.show { display: flex; }
+
+.modal {
+  background: var(--surface); border: var(--rule);
+  border-radius: 3px; width: 100%; max-width: 520px;
+  animation: min 0.18s ease-out; overflow: hidden;
+}
+.modal.wide { max-width: 780px; }
+@keyframes min {
+  from { transform: translateY(10px); opacity: 0; }
+  to   { transform: translateY(0);   opacity: 1; }
+}
+.modal-hd {
+  padding: 18px 22px 14px; border-bottom: var(--rule);
+  display: flex; align-items: center; justify-content: space-between;
+}
+.modal-hd h2 {
+  font-family: 'IBM Plex Serif', serif;
+  font-size: 1rem; font-weight: 300; color: var(--text);
+}
+.modal-x {
+  background: none; border: var(--rule); border-radius: 2px;
+  width: 26px; height: 26px; cursor: pointer;
+  color: var(--text3); font-size: 0.75rem;
+  display: flex; align-items: center; justify-content: center;
+  transition: all 0.12s;
+}
+.modal-x:hover { border-color: var(--border2); color: var(--text2); }
+.modal-bd { padding: 22px; }
+.modal-ft {
+  padding: 14px 22px; border-top: var(--rule);
+  display: flex; justify-content: flex-end; gap: 8px;
+}
+
+/* Winner */
+.winner-bd { padding: 40px 32px 32px; text-align: center; }
+.win-title {
+  font-family: 'IBM Plex Serif', serif;
+  font-size: 2.8rem; font-weight: 300;
+  letter-spacing: 0.06em; color: var(--text); margin-bottom: 6px;
+}
+.win-sub {
+  font-size: 0.68rem; letter-spacing: 0.18em;
+  text-transform: uppercase; color: var(--text3); margin-bottom: 26px;
+}
+
+/* Print modal */
+.print-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 20px; }
+.form-field label {
+  display: block; font-size: 0.6rem;
+  letter-spacing: 0.18em; text-transform: uppercase;
+  color: var(--text3); margin-bottom: 6px;
+}
+.qty-ctrl {
+  display: flex; align-items: center;
+  border: var(--rule); border-radius: 2px;
+  overflow: hidden; width: fit-content;
+}
+.qty-ctrl button {
+  background: var(--surface2); border: none;
+  color: var(--text2); width: 30px; height: 32px;
+  font-size: 1rem; cursor: pointer; transition: background 0.1s;
+  border-right: var(--rule);
+}
+.qty-ctrl button:last-child { border-right: none; border-left: var(--rule); }
+.qty-ctrl button:hover { background: var(--border); color: var(--text); }
+.qty-v {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.85rem; color: var(--text);
+  min-width: 40px; text-align: center; padding: 0 6px;
+  line-height: 32px;
+}
+.radio-grp { display: flex; gap: 6px; flex-wrap: wrap; }
+.radio-opt {
+  display: flex; align-items: center; gap: 4px;
+  font-size: 0.72rem; color: var(--text2);
+  cursor: pointer; padding: 5px 11px;
+  border: var(--rule); border-radius: 2px; transition: all 0.12s;
+}
+.radio-opt:has(input:checked) { background: var(--text); color: var(--bg); border-color: var(--text); }
+.radio-opt input { display: none; }
+.txt-input {
+  width: 100%; background: var(--surface2);
+  border: var(--rule); border-radius: 2px;
+  padding: 7px 10px; color: var(--text);
+  font-family: 'IBM Plex Sans', sans-serif; font-size: 0.85rem;
+  outline: none; transition: border-color 0.12s;
+}
+.txt-input:focus { border-color: var(--border2); }
+.prev-lbl {
+  font-size: 0.58rem; letter-spacing: 0.2em;
+  text-transform: uppercase; color: var(--text3); margin-bottom: 8px;
+}
+.prev-scroll {
+  max-height: 300px; overflow-y: auto;
+  border: var(--rule); border-radius: 2px;
+  background: var(--surface2); padding: 14px;
+}
+.prev-scroll::-webkit-scrollbar { width: 3px; }
+.prev-scroll::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 2px; }
+#prev-grid { display: grid; gap: 10px; }
+.pv-card {
+  background: var(--surface); border: var(--rule);
+  border-radius: 2px; overflow: hidden;
+  max-width: 200px; justify-self: center; width: 100%;
+}
+.pv-title {
+  text-align: center;
+  font-family: 'IBM Plex Serif', serif; font-size: 0.8rem;
+  font-weight: 300; letter-spacing: 0.2em; text-transform: uppercase;
+  padding: 6px 0 4px; color: var(--text); border-bottom: var(--rule);
+}
+.pv-num {
+  text-align: center; font-size: 0.5rem; color: var(--text3);
+  font-family: 'IBM Plex Mono', monospace; letter-spacing: 0.1em;
+  padding: 3px 0; background: var(--surface2); border-bottom: var(--rule);
+}
+.pv-head { display: grid; grid-template-columns: repeat(5,1fr); border-bottom: var(--rule); }
+.pv-head span {
+  text-align: center; padding: 3px 0;
+  font-family: 'IBM Plex Serif', serif; font-size: 0.75rem; color: var(--text2);
+  border-right: var(--rule);
+}
+.pv-head span:last-child { border-right: none; }
+.pv-body { display: grid; grid-template-columns: repeat(5,1fr); }
+.pv-cell {
+  aspect-ratio: 1; display: flex; align-items: center; justify-content: center;
+  font-family: 'IBM Plex Mono', monospace; font-size: 0.62rem; color: var(--text);
+  border-right: var(--rule); border-bottom: var(--rule);
+}
+.pv-cell:nth-child(5n) { border-right: none; }
+.pv-cell:nth-last-child(-n+5) { border-bottom: none; }
+.pv-free {
+  font-family: 'IBM Plex Sans', sans-serif; font-size: 0.38rem;
+  letter-spacing: 0.06em; text-transform: uppercase;
+  color: var(--text3); font-weight: 500; background: var(--surface2);
+}
+
+/* ── TOAST ───────────────────────────────────────── */
+.toast {
+  position: fixed; bottom: 24px; left: 50%;
+  transform: translateX(-50%) translateY(60px);
+  background: var(--text); color: var(--bg);
+  border-radius: 2px; padding: 8px 18px;
+  font-size: 0.72rem; letter-spacing: 0.1em; font-weight: 500;
+  z-index: 200; transition: transform 0.22s cubic-bezier(0.34,1.4,0.64,1);
+  white-space: nowrap; pointer-events: none;
+}
+.toast.show { transform: translateX(-50%) translateY(0); }
+.toast.err  { background: var(--red); }
+.toast.ok   { background: var(--green); }
+
+/* ── PRINT ───────────────────────────────────────── */
+#print-area { display: none; }
+@media print {
+  body > *:not(#print-area) { display: none !important; }
+  #print-area { display: block !important; }
+  .print-page {
+    page-break-after: always; display: grid;
+    gap: 8mm; padding: 12mm; box-sizing: border-box;
+  }
+  .print-page.l1 { grid-template-columns: 1fr; }
+  .print-page.l2 { grid-template-columns: 1fr 1fr; }
+  .print-page.l4 { grid-template-columns: 1fr 1fr; }
+  .pc { border: 1px solid #ccc; border-radius: 2px; overflow: hidden; page-break-inside: avoid; font-family: Georgia, serif; }
+  .pc-title {
+    text-align: center; font-size: 12pt; font-weight: normal;
+    letter-spacing: 5px; text-transform: uppercase;
+    padding: 8px 0; border-bottom: 1px solid #ccc; color: #111;
+  }
+  .pc-num {
+    text-align: center; font-size: 6pt; color: #aaa;
+    padding: 3px 0; font-family: 'Courier New', monospace;
+    letter-spacing: 1px; text-transform: uppercase; border-bottom: 1px solid #eee;
+  }
+  .pc-head {
+    display: grid; grid-template-columns: repeat(5,1fr);
+    background: #f7f7f7 !important;
+    -webkit-print-color-adjust: exact; print-color-adjust: exact;
+    border-bottom: 1px solid #ccc;
+  }
+  .pc-head span {
+    text-align: center; padding: 5px 0; font-size: 11pt;
+    font-weight: normal; letter-spacing: 2px; color: #333;
+    border-right: 1px solid #ddd;
+  }
+  .pc-head span:last-child { border-right: none; }
+  .pc-body { display: grid; grid-template-columns: repeat(5,1fr); }
+  .pc-cell {
+    aspect-ratio: 1; display: flex; align-items: center; justify-content: center;
+    font-size: 10pt; color: #111;
+    border-right: 1px solid #ddd; border-bottom: 1px solid #ddd;
+    font-family: 'Courier New', monospace;
+  }
+  .pc-cell:nth-child(5n) { border-right: none; }
+  .pc-cell:nth-last-child(-n+5) { border-bottom: none; }
+  .pc-free {
+    background: #f7f7f7 !important;
+    -webkit-print-color-adjust: exact; print-color-adjust: exact;
+    color: #999; font-size: 5pt;
+    font-family: Arial, sans-serif; text-transform: uppercase;
+    letter-spacing: 1px; font-weight: bold;
+  }
+  @page { margin: 0; size: A4 portrait; }
+}
+
+/* ── RESPONSIVE ─────────────────────────────────── */
+@media (max-width: 860px) {
+  .app { grid-template-columns: 1fr; padding: 20px 20px 40px; gap: 16px; }
+  .sorteio-card { grid-column: 1; grid-row: 1; }
+  .tabela-card  { grid-column: 1; grid-row: 2; }
+  .cartela-card { grid-column: 1; grid-row: 3; }
+  header { padding: 22px 20px 18px; }
+  .num-grid { grid-template-columns: repeat(10, 1fr); }
+}
+@media (max-width: 480px) {
+  .num-grid { grid-template-columns: repeat(7, 1fr); }
+  .print-grid { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-left">
+    <h1>Bingo</h1>
+    <p>Sorteador de números · 1 — 75</p>
+  </div>
+</header>
+
+<div class="app">
+
+  <!-- SORTEIO -->
+  <div class="card sorteio-card">
+    <div class="card-head"><h2>Sorteio</h2></div>
+
+    <div class="ball-row">
+      <div class="ball" id="ball">
+        <span class="ball-num" id="ball-num">—</span>
+        <span class="ball-letter" id="ball-letter"></span>
+      </div>
+      <div class="ball-info">
+        <div class="ball-info-label">Número atual</div>
+        <div class="ball-info-num" id="info-num">—</div>
+      </div>
+    </div>
+
+    <div class="stats-bar">
+      <div class="stat">
+        <div class="stat-n" id="cnt-drawn">0</div>
+        <div class="stat-l">Sorteados</div>
+      </div>
+      <div class="stat">
+        <div class="stat-n" id="cnt-left">75</div>
+        <div class="stat-l">Restantes</div>
+      </div>
+      <div class="stat">
+        <div class="stat-n" id="cnt-pct">0%</div>
+        <div class="stat-l">Progresso</div>
+      </div>
+    </div>
+
+    <div class="controls">
+      <div class="btn-row">
+        <button class="btn btn-primary" id="btn-draw" onclick="drawNumber()">Sortear</button>
+        <button class="btn btn-secondary" id="btn-auto" onclick="toggleAuto()">Automático</button>
+        <button class="btn btn-ghost" onclick="resetGame()">Reiniciar</button>
+      </div>
+      <div class="speed-row">
+        <label>Intervalo</label>
+        <input type="range" id="speed-range" min="1" max="5" value="2" oninput="updateSpeed(this.value)">
+        <span class="speed-lbl" id="speed-lbl">2 s</span>
+      </div>
+    </div>
+
+    <div class="history">
+      <div class="section-label">Histórico</div>
+      <div class="h-list" id="h-list">
+        <span class="h-empty">Nenhum número sorteado</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- TABELA -->
+  <div class="card tabela-card">
+    <div class="card-head"><h2>Tabela de números</h2></div>
+    <div class="col-strip">
+      <div class="col-tag">B · 1–15</div>
+      <div class="col-tag">I · 16–30</div>
+      <div class="col-tag">N · 31–45</div>
+      <div class="col-tag">G · 46–60</div>
+      <div class="col-tag">O · 61–75</div>
+    </div>
+    <div class="num-grid" id="num-grid"></div>
+  </div>
+
+  <!-- CARTELA -->
+  <div class="card cartela-card">
+    <div class="card-head"><h2>Cartela do jogador</h2></div>
+    <div class="cartela-actions">
+      <button class="btn btn-secondary" onclick="generateCard()">Nova cartela</button>
+      <button class="btn btn-confirm" onclick="checkBingo()">Verificar bingo</button>
+      <button class="btn btn-ghost" onclick="openPrintModal()">Imprimir</button>
+    </div>
+    <div style="padding:0 16px 16px;">
+      <table class="bingo-table">
+        <thead>
+          <tr><th>B</th><th>I</th><th>N</th><th>G</th><th>O</th></tr>
+        </thead>
+        <tbody id="card-tbody"></tbody>
+      </table>
+    </div>
+  </div>
+
+</div>
+
+<!-- WINNER MODAL -->
+<div class="overlay" id="ov-winner">
+  <div class="modal">
+    <div class="winner-bd">
+      <div class="win-title">Bingo!</div>
+      <div class="win-sub">Linha completa confirmada</div>
+      <button class="btn btn-primary" onclick="closeWinner()">Continuar</button>
+    </div>
+  </div>
+</div>
+
+<!-- PRINT MODAL -->
+<div class="overlay" id="ov-print" style="align-items:flex-start;overflow-y:auto;padding:28px 20px 48px;">
+  <div class="modal wide">
+    <div class="modal-hd">
+      <h2>Imprimir cartelas</h2>
+      <button class="modal-x" onclick="closePrint()">✕</button>
+    </div>
+    <div class="modal-bd">
+      <div class="print-grid">
+        <div class="form-field">
+          <label>Quantidade</label>
+          <div class="qty-ctrl">
+            <button onclick="changeQty(-1)">−</button>
+            <span class="qty-v" id="qty-v">4</span>
+            <button onclick="changeQty(1)">+</button>
+          </div>
+        </div>
+        <div class="form-field">
+          <label>Layout por página</label>
+          <div class="radio-grp">
+            <label class="radio-opt"><input type="radio" name="lay" value="1" onchange="setLayout(1)"> 1</label>
+            <label class="radio-opt"><input type="radio" name="lay" value="2" onchange="setLayout(2)"> 2</label>
+            <label class="radio-opt"><input type="radio" name="lay" value="4" checked onchange="setLayout(4)"> 4</label>
+          </div>
+        </div>
+        <div class="form-field" style="grid-column:1/-1">
+          <label>Título das cartelas</label>
+          <input type="text" class="txt-input" id="p-title" value="BINGO" maxlength="30" oninput="renderPrev()">
+        </div>
+      </div>
+      <div class="prev-lbl">Pré-visualização</div>
+      <div class="prev-scroll"><div id="prev-grid"></div></div>
+    </div>
+    <div class="modal-ft">
+      <button class="btn btn-ghost" onclick="regenPrint()">Gerar novas cartelas</button>
+      <button class="btn btn-primary" onclick="doPrint()">Imprimir agora</button>
+    </div>
+  </div>
+</div>
+
+<div id="print-area"></div>
+<div class="toast" id="toast"></div>
+
+<script>
+// ── STATE ───────────────────────────────────────────────
+const TOTAL = 75;
+const COL_RANGES = [[1,15],[16,30],[31,45],[46,60],[61,75]];
+const COL_LETTERS = ['B','I','N','G','O'];
+let drawn = new Set(), cardCols = [], marked = new Set();
+let autoOn = false, autoTimer = null, speedSec = 2, bingoShown = false;
+
+function colOf(n) { return Math.floor((n-1)/15); }
+
+// ── GRID ────────────────────────────────────────────────
+function buildGrid() {
+  const g = document.getElementById('num-grid');
+  g.innerHTML = '';
+  for (let i = 1; i <= TOTAL; i++) {
+    const c = document.createElement('div');
+    c.className = 'nc'; c.id = 'nc-'+i; c.textContent = i;
+    g.appendChild(c);
+  }
+}
+
+// ── DRAW ────────────────────────────────────────────────
+function drawNumber() {
+  const pool = [];
+  for (let i = 1; i <= TOTAL; i++) if (!drawn.has(i)) pool.push(i);
+  if (!pool.length) { showToast('Todos os números foram sorteados.'); stopAuto(); return; }
+
+  const n = pool[Math.floor(Math.random() * pool.length)];
+  drawn.add(n);
+  const col = colOf(n);
+
+  document.getElementById('ball-num').textContent = n;
+  document.getElementById('ball-letter').textContent = COL_LETTERS[col];
+  document.getElementById('info-num').textContent = n;
+  const ball = document.getElementById('ball');
+  ball.classList.add('active');
+  ball.style.animation = 'none';
+  void ball.offsetWidth;
+  ball.style.animation = 'bpop .26s cubic-bezier(.34,1.5,.64,1)';
+
+  document.getElementById('cnt-drawn').textContent = drawn.size;
+  document.getElementById('cnt-left').textContent = TOTAL - drawn.size;
+  document.getElementById('cnt-pct').textContent = Math.round(drawn.size / TOTAL * 100) + '%';
+
+  const prev = document.querySelector('.nc.latest');
+  if (prev) prev.classList.remove('latest');
+  const nc = document.getElementById('nc-'+n);
+  nc.classList.add('drawn', 'latest');
+
+  updateHistory();
+  autoMarkCard(n);
+}
+
+function updateHistory() {
+  const list = document.getElementById('h-list');
+  list.innerHTML = '';
+  [...drawn].reverse().forEach((n, i) => {
+    const c = document.createElement('div');
+    c.className = 'h-chip' + (i===0?' new':'');
+    c.textContent = n; list.appendChild(c);
+  });
+}
+
+// ── AUTO ────────────────────────────────────────────────
+function toggleAuto() { autoOn ? stopAuto() : startAuto(); }
+function startAuto() {
+  autoOn = true;
+  const b = document.getElementById('btn-auto');
+  b.textContent = 'Parar'; b.className = 'btn btn-stop';
+  autoTimer = setInterval(() => {
+    const pool = []; for (let i=1;i<=TOTAL;i++) if(!drawn.has(i)) pool.push(i);
+    if (!pool.length) { stopAuto(); return; }
+    drawNumber();
+  }, speedSec * 1000);
+}
+function stopAuto() {
+  autoOn = false; clearInterval(autoTimer); autoTimer = null;
+  const b = document.getElementById('btn-auto');
+  b.textContent = 'Automático'; b.className = 'btn btn-secondary';
+}
+function updateSpeed(v) {
+  const sec = {'1':.5,'2':2,'3':4,'4':6,'5':10};
+  const lbl = {'1':'0.5 s','2':'2 s','3':'4 s','4':'6 s','5':'10 s'};
+  speedSec = sec[v];
+  document.getElementById('speed-lbl').textContent = lbl[v];
+  if (autoOn) { stopAuto(); startAuto(); }
+}
+
+// ── RESET ────────────────────────────────────────────────
+function resetGame() {
+  stopAuto(); drawn = new Set(); bingoShown = false;
+  document.getElementById('ball-num').textContent = '—';
+  document.getElementById('ball-letter').textContent = '';
+  document.getElementById('info-num').textContent = '—';
+  document.getElementById('ball').classList.remove('active');
+  document.getElementById('cnt-drawn').textContent = '0';
+  document.getElementById('cnt-left').textContent = '75';
+  document.getElementById('cnt-pct').textContent = '0%';
+  document.getElementById('h-list').innerHTML = '<span class="h-empty">Nenhum número sorteado</span>';
+  buildGrid(); generateCard(); showToast('Jogo reiniciado.');
+}
+
+// ── CARTELA ──────────────────────────────────────────────
+function generateCard() {
+  cardCols = [];
+  for (let col=0; col<5; col++) {
+    const [lo,hi] = COL_RANGES[col], pool=[];
+    for (let x=lo; x<=hi; x++) pool.push(x);
+    for (let i=pool.length-1; i>0; i--) { const j=Math.floor(Math.random()*(i+1)); [pool[i],pool[j]]=[pool[j],pool[i]]; }
+    cardCols.push(pool.slice(0,5));
+  }
+  marked = new Set([12]); bingoShown = false; renderCard();
+}
+function renderCard() {
+  const tbody = document.getElementById('card-tbody');
+  tbody.innerHTML = '';
+  for (let row=0; row<5; row++) {
+    const tr = document.createElement('tr');
+    for (let col=0; col<5; col++) {
+      const idx = row*5+col, td = document.createElement('td');
+      const ci = document.createElement('div'); ci.className = 'ci';
+      if (idx===12) {
+        td.classList.add('free-cell'); ci.textContent = 'Free';
+      } else {
+        const n = cardCols[col][row];
+        ci.textContent = n;
+        if (drawn.has(n)) marked.add(idx);
+        if (marked.has(idx)) td.classList.add('marked');
+        td.onclick = () => toggleMark(idx);
+      }
+      if (marked.has(idx) && idx!==12) td.classList.add('marked');
+      td.appendChild(ci); tr.appendChild(td);
+    }
+    tbody.appendChild(tr);
+  }
+}
+function toggleMark(idx) {
+  if (idx===12) return;
+  marked.has(idx) ? marked.delete(idx) : marked.add(idx);
+  renderCard();
+}
+function autoMarkCard(n) {
+  for (let col=0;col<5;col++) for (let row=0;row<5;row++) if (cardCols[col][row]===n) marked.add(row*5+col);
+  renderCard();
+}
+
+// ── BINGO CHECK ──────────────────────────────────────────
+function checkBingo() {
+  const lines = [];
+  for (let r=0;r<5;r++) lines.push([r*5,r*5+1,r*5+2,r*5+3,r*5+4]);
+  for (let c=0;c<5;c++) lines.push([c,c+5,c+10,c+15,c+20]);
+  lines.push([0,6,12,18,24],[4,8,12,16,20]);
+  const win = lines.find(l => l.every(i => marked.has(i)));
+  if (win) {
+    document.querySelectorAll('#card-tbody td').forEach((td,i) => {
+      td.classList.remove('winning'); if (win.includes(i)) td.classList.add('winning');
+    });
+    if (!bingoShown) { bingoShown = true; setTimeout(() => document.getElementById('ov-winner').classList.add('show'), 200); }
+  } else {
+    showToast('Ainda sem bingo.', 'err');
+  }
+}
+function closeWinner() { document.getElementById('ov-winner').classList.remove('show'); }
+
+// ── TOAST ────────────────────────────────────────────────
+let tt;
+function showToast(msg, type='') {
+  const t = document.getElementById('toast'); clearTimeout(tt);
+  t.textContent = msg; t.className = 'toast show' + (type?' '+type:'');
+  tt = setTimeout(() => t.classList.remove('show'), 2600);
+}
+
+// ── PRINT ────────────────────────────────────────────────
+let pCards=[], pQty=4, pLayout=4;
+function genPC() {
+  const cols=[];
+  for (let col=0;col<5;col++) {
+    const [lo,hi]=COL_RANGES[col], pool=[];
+    for (let x=lo;x<=hi;x++) pool.push(x);
+    for (let i=pool.length-1;i>0;i--) { const j=Math.floor(Math.random()*(i+1)); [pool[i],pool[j]]=[pool[j],pool[i]]; }
+    cols.push(pool.slice(0,5));
+  }
+  return cols;
+}
+function regenPrint() { pCards = Array.from({length:pQty}, genPC); renderPrev(); }
+function changeQty(d) { pQty=Math.max(1,Math.min(40,pQty+d)); document.getElementById('qty-v').textContent=pQty; regenPrint(); }
+function setLayout(v) { pLayout=parseInt(v); renderPrev(); }
+function openPrintModal() { if(!pCards.length) regenPrint(); else renderPrev(); document.getElementById('ov-print').classList.add('show'); }
+function closePrint() { document.getElementById('ov-print').classList.remove('show'); }
+function renderPrev() {
+  const g = document.getElementById('prev-grid');
+  g.style.gridTemplateColumns = `repeat(${pLayout===1?1:2},1fr)`;
+  g.innerHTML = '';
+  const title = document.getElementById('p-title').value||'BINGO';
+  pCards.forEach((card,idx) => {
+    let cells='';
+    for (let row=0;row<5;row++) for (let col=0;col<5;col++) {
+      const i=row*5+col;
+      cells += i===12 ? `<div class="pv-cell pv-free">Free</div>` : `<div class="pv-cell">${card[col][row]}</div>`;
+    }
+    const el = document.createElement('div'); el.className='pv-card';
+    el.innerHTML=`<div class="pv-title">${title}</div><div class="pv-num">Cartela #${idx+1}</div><div class="pv-head"><span>B</span><span>I</span><span>N</span><span>G</span><span>O</span></div><div class="pv-body">${cells}</div>`;
+    g.appendChild(el);
+  });
+}
+function doPrint() {
+  const title = document.getElementById('p-title').value||'BINGO';
+  const area = document.getElementById('print-area'); area.innerHTML='';
+  for (let p=0; p<pCards.length; p+=pLayout) {
+    const page = document.createElement('div'); page.className=`print-page l${pLayout}`;
+    pCards.slice(p,p+pLayout).forEach((card,i) => {
+      let cells='';
+      for (let row=0;row<5;row++) for (let col=0;col<5;col++) {
+        const fi=row*5+col;
+        cells += fi===12 ? `<div class="pc-cell pc-free">FREE</div>` : `<div class="pc-cell">${card[col][row]}</div>`;
+      }
+      page.innerHTML += `<div class="pc"><div class="pc-title">${title}</div><div class="pc-num">Cartela #${p+i+1}</div><div class="pc-head"><span>B</span><span>I</span><span>N</span><span>G</span><span>O</span></div><div class="pc-body">${cells}</div></div>`;
+    });
+    area.appendChild(page);
+  }
+  closePrint(); setTimeout(() => window.print(), 150);
+}
+
+// ── INIT ─────────────────────────────────────────────────
+buildGrid(); generateCard();
+const s = document.createElement('style');
+s.textContent='@keyframes bpop{0%{transform:scale(.7);opacity:0}60%{transform:scale(1.06)}100%{transform:scale(1);opacity:1}}';
+document.head.appendChild(s);
+</script>
+</body>
+</html>
