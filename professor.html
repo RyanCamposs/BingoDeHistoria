@@ -1,0 +1,608 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bingo da Mesopotâmia – Professor</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;900&family=Cinzel+Decorative:wght@400;700&family=IM+Fell+English:ital@0;1&display=swap');
+
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --p:#f4e4b8;--pd:#d4b98a;--pdd:#c4a070;
+  --bdk:#3d1f00;--bmd:#6b3a0f;--blt:#8b5a2b;
+  --g:#c9902a;--gl:#e8c060;--gs:#f5d87a;
+  --red:#8b1a1a;--blue:#2a4a7f;--green:#1a5a1a;
+}
+
+html,body{height:100%;overflow:hidden}
+body{
+  font-family:'Cinzel',serif;
+  background:#0f0800;
+  color:var(--p);
+  display:flex;flex-direction:column;
+}
+
+/* HEADER */
+header{
+  background:linear-gradient(180deg,#251200,#180c00);
+  border-bottom:3px solid var(--g);
+  padding:14px 28px;
+  display:flex;align-items:center;justify-content:space-between;
+  gap:16px;flex-shrink:0;
+  box-shadow:0 4px 24px rgba(0,0,0,.7);
+}
+.h-title{
+  font-family:'Cinzel Decorative',serif;
+  font-size:clamp(1rem,2vw,1.5rem);
+  color:var(--gs);
+}
+.h-sub{font-size:.7rem;letter-spacing:3px;color:var(--p);text-transform:uppercase;margin-top:3px;font-weight:600}
+.h-badge{
+  background:linear-gradient(145deg,#6a1010,#3a0808);
+  border:1.5px solid var(--g);border-radius:20px;
+  padding:7px 18px;font-size:.78rem;letter-spacing:2px;
+  color:var(--gs);text-transform:uppercase;font-weight:700;
+}
+.h-link{
+  background:linear-gradient(145deg,var(--blue),#1a2a50);
+  border:1.5px solid var(--gl);border-radius:8px;
+  padding:8px 16px;font-family:'Cinzel',serif;
+  font-size:.7rem;letter-spacing:1px;
+  color:var(--gl);text-decoration:none;transition:all .2s;
+  white-space:nowrap;
+}
+.h-link:hover{background:linear-gradient(145deg,#3a5aaf,var(--blue));transform:translateY(-1px)}
+
+/* LAYOUT 3 COLUNAS */
+.layout{
+  flex:1;overflow:hidden;
+  display:grid;
+  grid-template-columns:260px 1fr 270px;
+}
+
+/* ===== COL ESQUERDA: JÁ SORTEADOS ===== */
+.col-l{
+  background:linear-gradient(180deg,#160a00,#0f0600);
+  border-right:2px solid rgba(201,144,42,.18);
+  display:flex;flex-direction:column;overflow:hidden;
+}
+.col-hdr{
+  font-family:'Cinzel Decorative',serif;
+  font-size:.82rem;letter-spacing:2px;color:var(--gs);
+  text-transform:uppercase;
+  padding:15px 16px 11px;
+  border-bottom:1px solid rgba(201,144,42,.12);
+  flex-shrink:0;text-align:center;
+}
+.drawn-list{
+  flex:1;overflow-y:auto;
+  padding:10px;
+  display:flex;flex-direction:column;gap:5px;
+}
+.drawn-item{
+  background:rgba(42,74,127,.18);
+  border:1px solid rgba(42,74,127,.38);
+  border-radius:8px;padding:8px 11px;
+  display:flex;align-items:center;gap:9px;
+  animation:slideIn .3s ease-out;
+}
+@keyframes slideIn{from{opacity:0;transform:translateX(-8px)}to{opacity:1;transform:translateX(0)}}
+.d-num{
+  width:24px;height:24px;border-radius:50%;flex-shrink:0;
+  background:radial-gradient(circle at 35% 35%,var(--gs),var(--g),var(--bmd));
+  border:2px solid var(--bdk);
+  display:flex;align-items:center;justify-content:center;
+  font-size:.55rem;font-weight:900;color:var(--bdk);
+}
+.d-name{font-size:.85rem;font-weight:700;color:var(--gl);line-height:1.2}
+.drawn-empty{
+  text-align:center;color:rgba(212,185,138,.5);
+  font-family:'Cinzel',serif;
+  font-size:.85rem;padding:28px 12px;line-height:1.7;
+}
+.l-footer{
+  padding:12px 16px;
+  border-top:1px solid rgba(201,144,42,.12);
+  text-align:center;flex-shrink:0;
+}
+.l-footer-val{
+  font-size:2.2rem;font-weight:900;color:var(--gs);line-height:1;
+}
+.l-footer-sub{font-size:.7rem;letter-spacing:2px;color:var(--pd);text-transform:uppercase;margin-top:3px;font-weight:600}
+
+/* ===== COL CENTRO: SORTEIO ===== */
+.col-c{
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  padding:36px 48px;gap:22px;
+  background:radial-gradient(ellipse at 50% 40%,#221100,#0f0800);
+  position:relative;overflow:hidden;
+}
+.col-c::before{
+  content:'';position:absolute;inset:0;
+  background:radial-gradient(ellipse at 50% 25%,rgba(201,144,42,.05),transparent 55%);
+  pointer-events:none;
+}
+
+/* Estado vazio */
+.empty-st{
+  text-align:center;
+  color:rgba(212,185,138,.55);
+  font-family:'Cinzel',serif;font-size:.95rem;
+}
+.empty-st span{font-size:2.8rem;display:block;margin-bottom:10px;opacity:.5}
+
+/* Card da pergunta */
+.q-card{
+  width:100%;max-width:540px;
+  background:linear-gradient(160deg,var(--p) 0%,#e8d5a0 100%);
+  border:4px solid var(--g);border-radius:22px;
+  padding:34px 38px;
+  box-shadow:0 20px 56px rgba(0,0,0,.6),0 0 70px rgba(201,144,42,.1),inset 0 1px 0 rgba(255,255,255,.35);
+  position:relative;overflow:hidden;text-align:center;
+  display:none;
+}
+.q-card::before{
+  content:'';position:absolute;inset:0;
+  background:linear-gradient(135deg,rgba(255,255,255,.1) 0%,transparent 45%);
+  pointer-events:none;
+}
+.q-card::after{
+  content:'';position:absolute;top:9px;left:9px;right:9px;bottom:9px;
+  border:1.5px solid var(--pdd);border-radius:15px;pointer-events:none;
+}
+.q-card.visible{display:block;animation:cardIn .4s cubic-bezier(.22,1,.36,1)}
+@keyframes cardIn{from{opacity:0;transform:translateY(12px) scale(.96)}to{opacity:1;transform:translateY(0) scale(1)}}
+
+.qc-badge{
+  display:inline-block;
+  background:linear-gradient(145deg,var(--red),#5a0808);
+  border:1.5px solid var(--bdk);border-radius:20px;
+  padding:4px 16px;font-size:.75rem;letter-spacing:2px;
+  color:var(--gs);font-weight:700;
+  margin-bottom:16px;
+}
+.qc-term{
+  font-family:'Cinzel Decorative',serif;
+  font-size:clamp(1.3rem,2.5vw,1.9rem);
+  color:var(--red);
+  text-shadow:1px 1px 0 var(--pdd);
+  margin-bottom:20px;line-height:1.2;
+}
+.qc-line{
+  width:50%;height:2px;
+  background:linear-gradient(to right,transparent,var(--g),transparent);
+  margin:0 auto 22px;
+}
+.qc-question{
+  font-family:'Cinzel',serif;
+  font-size:clamp(1rem,1.8vw,1.2rem);
+  color:var(--bdk);line-height:1.75;
+  margin-bottom:22px;font-weight:600;
+}
+.qc-ans-btn{
+  background:rgba(26,90,26,.25);
+  border:2px solid rgba(26,160,26,.5);
+  color:#2d8a2d;
+  font-family:'Cinzel',serif;font-size:.8rem;font-weight:700;letter-spacing:1px;
+  padding:9px 24px;border-radius:20px;cursor:pointer;transition:all .2s;
+}
+.qc-ans-btn:hover{background:rgba(26,90,26,.4);border-color:rgba(26,200,26,.7);color:#1a6a1a}
+.qc-ans{
+  margin-top:12px;
+  background:rgba(26,90,26,.15);
+  border:1.5px solid rgba(26,160,26,.35);border-radius:10px;
+  padding:14px 18px;
+  font-family:'Cinzel',serif;
+  font-size:.92rem;color:#1a4a1a;line-height:1.6;font-weight:700;
+  display:none;animation:fadeUp .3s ease-out;
+}
+@keyframes fadeUp{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:translateY(0)}}
+.qc-ans.show{display:block}
+
+/* Botões */
+.btn-draw{
+  width:100%;max-width:540px;
+  background:linear-gradient(145deg,#8b1a1a,#5a0808);
+  border:3px solid var(--g);color:var(--gs);
+  font-family:'Cinzel Decorative',serif;
+  font-size:1.1rem;letter-spacing:1px;
+  padding:18px;border-radius:14px;
+  cursor:pointer;transition:all .3s;
+  box-shadow:0 8px 28px rgba(0,0,0,.5);
+  position:relative;overflow:hidden;
+}
+.btn-draw::after{
+  content:'';position:absolute;top:0;left:-100%;width:100%;height:100%;
+  background:linear-gradient(90deg,transparent,rgba(255,255,255,.07),transparent);
+  transition:left .5s;
+}
+.btn-draw:hover:not(:disabled)::after{left:100%}
+.btn-draw:hover:not(:disabled){
+  background:linear-gradient(145deg,#b02020,#8b1a1a);
+  transform:translateY(-2px);
+  box-shadow:0 12px 36px rgba(0,0,0,.6),0 0 28px rgba(200,50,50,.25);
+}
+.btn-draw:disabled{opacity:.35;cursor:not-allowed}
+.btn-reset{
+  background:transparent;border:1.5px solid rgba(201,144,42,.35);
+  color:var(--pd);
+  font-family:'Cinzel',serif;font-size:.75rem;font-weight:600;letter-spacing:1px;
+  padding:8px 24px;border-radius:20px;cursor:pointer;transition:all .2s;
+}
+.btn-reset:hover{border-color:var(--g);color:var(--gs)}
+
+/* ===== COL DIREITA: TODOS OS TERMOS ===== */
+.col-r{
+  background:linear-gradient(180deg,#160a00,#0f0600);
+  border-left:2px solid rgba(201,144,42,.18);
+  display:flex;flex-direction:column;overflow:hidden;
+}
+.terms-scroll{
+  flex:1;overflow-y:auto;
+  padding:10px;
+  display:flex;flex-direction:column;gap:4px;
+}
+.t-row{
+  background:rgba(244,228,184,.04);
+  border:1px solid rgba(201,144,42,.18);
+  border-radius:8px;
+  padding:9px 12px;
+  cursor:pointer;
+  transition:all .2s;
+  display:flex;align-items:center;gap:9px;
+}
+.t-row:hover:not(.t-drawn){
+  background:rgba(201,144,42,.1);
+  border-color:rgba(201,144,42,.5);
+  transform:translateX(3px);
+}
+.t-row.t-drawn{
+  background:rgba(42,74,127,.12);
+  border-color:rgba(42,74,127,.35);
+  cursor:default;opacity:.65;
+}
+.t-check{
+  width:17px;height:17px;border-radius:50%;flex-shrink:0;
+  border:1.5px solid rgba(201,144,42,.25);
+  display:flex;align-items:center;justify-content:center;
+  font-size:.52rem;color:transparent;transition:all .2s;
+}
+.t-row.t-drawn .t-check{
+  background:rgba(42,74,127,.5);
+  border-color:var(--gl);color:var(--gl);
+}
+.t-name{
+  font-size:.85rem;font-weight:700;color:var(--p);line-height:1.2;flex:1;
+}
+.t-row.t-drawn .t-name{color:var(--gl)}
+
+/* SCROLLBAR */
+::-webkit-scrollbar{width:4px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:rgba(201,144,42,.35);border-radius:2px}
+
+/* MODAL */
+.modal-ov{
+  position:fixed;inset:0;background:rgba(0,0,0,.88);
+  display:none;align-items:center;justify-content:center;z-index:999;
+}
+.modal-ov.show{display:flex;animation:fIn .3s}
+@keyframes fIn{from{opacity:0}to{opacity:1}}
+.modal-box{
+  background:linear-gradient(145deg,var(--p),var(--pd));
+  border:5px solid var(--g);border-radius:22px;
+  padding:44px 40px;text-align:center;max-width:400px;width:90%;
+  box-shadow:0 24px 70px rgba(0,0,0,.8),0 0 60px rgba(201,144,42,.15);
+  animation:mPop .5s cubic-bezier(.22,1,.36,1);
+}
+@keyframes mPop{from{transform:scale(.6);opacity:0}to{transform:scale(1);opacity:1}}
+.m-icon{font-size:3.5rem;display:block;margin-bottom:14px}
+.m-ttl{font-family:'Cinzel Decorative',serif;font-size:1.8rem;color:var(--red);margin-bottom:8px;text-shadow:2px 2px 0 var(--pdd)}
+.m-txt{font-size:.85rem;color:var(--bmd);margin-bottom:24px;line-height:1.6}
+.m-close{
+  background:linear-gradient(145deg,var(--g),var(--bmd));
+  border:2px solid var(--bdk);color:var(--bdk);
+  font-family:'Cinzel',serif;font-size:.88rem;
+  padding:11px 30px;border-radius:8px;cursor:pointer;
+  font-weight:700;letter-spacing:1px;transition:all .2s;
+}
+.m-close:hover{transform:scale(1.05)}
+
+/* ===== TELA DE SENHA ===== */
+#senha-screen{
+  position:fixed;inset:0;z-index:9999;
+  background:radial-gradient(ellipse at center,#251200,#0f0600);
+  display:flex;align-items:center;justify-content:center;
+}
+.senha-box{
+  background:linear-gradient(145deg,var(--p),var(--pd));
+  border:4px solid var(--g);border-radius:22px;
+  padding:48px 44px;text-align:center;
+  width:90%;max-width:420px;
+  box-shadow:0 24px 70px rgba(0,0,0,.8),0 0 60px rgba(201,144,42,.15);
+}
+.senha-icon{font-size:3rem;display:block;margin-bottom:14px}
+.senha-title{
+  font-family:'Cinzel Decorative',serif;
+  font-size:1.6rem;color:var(--red);
+  text-shadow:2px 2px 0 var(--pdd);
+  margin-bottom:6px;
+}
+.senha-sub{
+  font-size:.75rem;letter-spacing:2px;color:var(--bmd);
+  text-transform:uppercase;margin-bottom:28px;
+}
+.senha-input{
+  width:100%;
+  background:#fff8e8;
+  border:2px solid var(--pdd);border-radius:10px;
+  padding:14px 18px;
+  font-family:'Cinzel',serif;font-size:1.05rem;
+  color:var(--bdk);letter-spacing:3px;
+  text-align:center;outline:none;
+  transition:border-color .2s;
+  margin-bottom:16px;
+}
+.senha-input:focus{border-color:var(--g);}
+.senha-input.erro{border-color:var(--red);animation:shake .35s ease-out;}
+@keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-8px)}75%{transform:translateX(8px)}}
+.senha-btn{
+  width:100%;
+  background:linear-gradient(145deg,#8b1a1a,#5a0808);
+  border:2px solid var(--g);border-radius:10px;
+  color:var(--gs);font-family:'Cinzel Decorative',serif;
+  font-size:1rem;letter-spacing:1px;padding:14px;
+  cursor:pointer;transition:all .2s;
+  box-shadow:0 6px 18px rgba(0,0,0,.4);
+}
+.senha-btn:hover{background:linear-gradient(145deg,#b02020,#8b1a1a);transform:translateY(-1px)}
+.senha-erro-msg{
+  font-size:.75rem;color:var(--red);
+  margin-top:10px;font-weight:700;
+  display:none;letter-spacing:1px;
+}
+
+@media(max-width:1050px){
+  .layout{grid-template-columns:220px 1fr 220px}
+  .col-c{padding:24px 28px}
+}
+@media(max-width:780px){
+  html,body{overflow:auto}
+  .layout{grid-template-columns:1fr;height:auto}
+  .col-l,.col-r{max-height:240px}
+}
+</style>
+</head>
+<body>
+
+<!-- TELA DE SENHA -->
+<div id="senha-screen">
+  <div class="senha-box">
+    <span class="senha-icon">🔐</span>
+    <div class="senha-title">Área Restrita</div>
+    <div class="senha-sub">Painel do Professor</div>
+    <input class="senha-input" id="senhaInput" type="password"
+      placeholder="••••••••••••"
+      onkeydown="if(event.key==='Enter')verificarSenha()"
+      autocomplete="off" />
+    <button class="senha-btn" onclick="verificarSenha()">🏛️ Entrar</button>
+    <div class="senha-erro-msg" id="senhaErro">Senha incorreta. Tente novamente.</div>
+  </div>
+</div>
+
+<!-- CONTEÚDO PRINCIPAL (oculto até senha correta) -->
+<div id="main-content" style="display:none;flex-direction:column;height:100%">
+
+<header>
+  <div>
+    <div class="h-title">👑 Bingo da Mesopotâmia</div>
+    <div class="h-sub">Painel do Professor</div>
+  </div>
+  <div class="h-badge">🎓 Modo Professor</div>
+  <a href="aluno.html" target="_blank" class="h-link">📜 Abrir Cartela do Aluno →</a>
+</header>
+
+<div class="layout">
+
+  <!-- ESQUERDA: JÁ SORTEADOS -->
+  <div class="col-l">
+    <div class="col-hdr">⟡ Já Sorteados ⟡</div>
+    <div class="drawn-list" id="drawnList">
+      <div class="drawn-empty">Nenhum termo<br>sorteado ainda.</div>
+    </div>
+    <div class="l-footer">
+      <div class="l-footer-val">
+        <span id="cntDrawn">0</span><span style="font-size:1.1rem;color:rgba(245,216,122,.4)">/24</span>
+      </div>
+      <div class="l-footer-sub">sorteados</div>
+    </div>
+  </div>
+
+  <!-- CENTRO: SORTEIO PRINCIPAL -->
+  <div class="col-c">
+
+    <div class="empty-st" id="emptySt">
+      <span>🏺</span>
+      Pressione o botão abaixo<br>para sortear a primeira pergunta
+    </div>
+
+    <div class="q-card" id="qCard">
+      <div class="qc-badge" id="qcBadge">Pergunta 1 de 24</div>
+      <div class="qc-line"></div>
+      <div class="qc-question" id="qcQuestion">—</div>
+      <div>
+        <button class="qc-ans-btn" id="ansBtn" onclick="toggleAnswer()">👁 Ver Resposta</button>
+        <div class="qc-ans" id="qcAns">
+          <div id="qcTerm" style="font-family:'Cinzel Decorative',serif;font-size:1rem;color:#8b1a1a;margin-bottom:8px;letter-spacing:.5px;"></div>
+          <div id="qcAnsText"></div>
+        </div>
+      </div>
+    </div>
+
+    <button class="btn-draw" id="drawBtn" onclick="drawTerm()">🎲 Sortear Próxima Pergunta</button>
+    <button class="btn-reset" onclick="resetGame()">↺ Reiniciar Jogo</button>
+
+  </div>
+
+  <!-- DIREITA: TODOS OS TERMOS -->
+  <div class="col-r">
+    <div class="col-hdr">⟡ Todos os Termos ⟡</div>
+    <div class="terms-scroll" id="termsList"></div>
+  </div>
+
+</div>
+
+</div><!-- /main-content -->
+
+<div class="modal-ov" id="modalOv">
+  <div class="modal-box">
+    <span class="m-icon">🎊</span>
+    <div class="m-ttl">Fim de Jogo!</div>
+    <div class="m-txt">Todas as 24 perguntas foram sorteadas.<br>Reinicie para jogar novamente!</div>
+    <button class="m-close" onclick="closeModal()">Fechar</button>
+  </div>
+</div>
+
+<script>
+const TERMS=[
+  {id:1,name:"Sumerianos",question:"Qual foi o povo considerado um dos primeiros a desenvolver a escrita e a viver em cidades organizadas na Mesopotâmia?",answer:"Os Sumerianos — povo que habitou o sul da Mesopotâmia e criou as primeiras cidades-estado, como Ur e Uruk."},
+  {id:2,name:"Código de Hamurabi",question:"Qual foi o conjunto de leis criado pelo rei babilônico que ficou conhecido pela ideia de punição proporcional ao crime?",answer:"O Código de Hamurabi — criado pelo rei Hamurabi da Babilônia, com 282 leis gravadas em pedra."},
+  {id:3,name:"Rio Tigre",question:"Qual rio, ao lado do Eufrates, formava a região fértil da Mesopotâmia, permitindo o desenvolvimento da agricultura?",answer:"O Rio Tigre — suas cheias periódicas, junto ao Eufrates, fertilizavam as terras do atual Iraque."},
+  {id:4,name:"Zigurate",question:"Como se chamavam as grandes torres em degraus construídas pelos mesopotâmicos como templos religiosos?",answer:"Zigurates — construções monumentais de vários andares, com templo no topo, dedicadas aos deuses."},
+  {id:5,name:"Escrita Cuneiforme",question:"Qual sistema de escrita, feito com estilete em tábuas de argila, foi desenvolvido pelos sumerianos?",answer:"A Escrita Cuneiforme — uma das primeiras formas de escrita da humanidade, com sinais em forma de cunha."},
+  {id:6,name:"Babilônia",question:"Qual grande cidade mesopotâmica foi capital de um dos maiores impérios da antiguidade e abrigava os famosos jardins suspensos?",answer:"A Babilônia — capital do Império Babilônico, famosa pelos Jardins Suspensos e pelo Código de Hamurabi."},
+  {id:7,name:"Deusa Ishtar",question:"Qual era a principal deusa da guerra e do amor venerada na Mesopotâmia, associada ao planeta Vênus?",answer:"Ishtar (ou Inanna) — deusa do amor, da fertilidade e da guerra, uma das mais importantes do panteão mesopotâmico."},
+  {id:8,name:"Cidades-Estado",question:"Como eram chamadas as unidades políticas independentes da Mesopotâmia, cada uma com seu próprio governo, leis e deuses?",answer:"Cidades-Estado — como Ur, Uruk e Lagash, governadas de forma autônoma com leis e deuses próprios."},
+  {id:9,name:"Epopeia de Gilgamesh",question:"Qual é considerado um dos mais antigos textos literários da humanidade, que narra as aventuras de um rei sumério em busca da imortalidade?",answer:"A Epopeia de Gilgamesh — poema épico sobre o rei Gilgamesh de Uruk, que também contém um relato de dilúvio."},
+  {id:10,name:"Lei do Talião",question:"Qual princípio jurídico presente no Código de Hamurabi estabelecia que a punição deveria ser igual ao dano causado?",answer:"A Lei do Talião — expressa na máxima 'olho por olho, dente por dente', visando punição proporcional."},
+  {id:11,name:"Balança da Justiça",question:"Qual símbolo representava o equilíbrio e a justiça nas culturas mesopotâmicas, presente em representações do deus Shamash?",answer:"A Balança da Justiça — símbolo de equilíbrio entre crimes e punições, associada ao deus sol Shamash."},
+  {id:12,name:"Jardins Suspensos",question:"Qual construção da Babilônia, atribuída ao rei Nabucodonosor II, era considerada uma das Sete Maravilhas do Mundo Antigo?",answer:"Os Jardins Suspensos da Babilônia — construídos para a rainha Amitis, saudosa de sua terra natal montanhosa."},
+  {id:13,name:"Deus Marduque",question:"Qual divindade se tornou o deus supremo do panteão babilônico e protetor da cidade da Babilônia?",answer:"Marduque (Marduk) — deus tutelar da Babilônia, rei dos deuses e criador do mundo na mitologia babilônica."},
+  {id:14,name:"Roda de Oração",question:"Qual invenção mesopotâmica, usada inicialmente para a olaria, depois transformou o transporte e a guerra na antiguidade?",answer:"A Roda — desenvolvida pelos sumerianos por volta de 3500 a.C., depois adaptada para carros de guerra e transporte."},
+  {id:15,name:"Astronomia",question:"Qual ciência foi amplamente desenvolvida pelos mesopotâmicos, que observavam os astros para prever estações, eclipses e criar calendários?",answer:"A Astronomia — os mesopotâmicos criaram um calendário lunar, identificaram planetas e fundaram a astrologia."},
+  {id:16,name:"Rei Sargão",question:"Qual rei acádio fundou o primeiro grande império da história, unificando as cidades-estado da Mesopotâmia?",answer:"Rei Sargão de Akkad — fundou o Império Acádio por volta de 2334 a.C., sendo o primeiro imperador da história."},
+  {id:17,name:"Escravidão",question:"Como era organizada a base do trabalho pesado nas sociedades mesopotâmicas, incluindo a construção de templos e palácios?",answer:"A Escravidão — escravos eram prisioneiros de guerra, devedores ou condenados que realizavam trabalhos pesados."},
+  {id:18,name:"Zigurate de Ur",question:"Qual é o zigurate mais bem preservado da Mesopotâmia, localizado na antiga cidade de Ur, dedicado ao deus-lua Nanna?",answer:"O Zigurate de Ur — construído por volta de 2100 a.C. pelo rei Ur-Nammu, dedicado ao deus Nanna (Sin)."},
+  {id:19,name:"Carruagens de Guerra",question:"Qual inovação militar mesopotâmica, puxada por cavalos ou burros, revolucionou os combates na antiguidade?",answer:"As Carruagens de Guerra — usadas pelos sumerianos e acádios, tornaram-se arma decisiva nas batalhas antigas."},
+  {id:20,name:"Deus Enki",question:"Qual divindade mesopotâmica era o deus da sabedoria, das águas doces e da criação, protetor da humanidade?",answer:"Enki (Ea) — deus da sabedoria e das águas subterrâneas, que advertiu Utnapishtim sobre o grande dilúvio."},
+  {id:21,name:"Tábuas de Argila",question:"Qual era o principal suporte de escrita usado na Mesopotâmia, onde eram registrados contratos, leis e literatura?",answer:"As Tábuas de Argila — gravadas com escrita cuneiforme e depois secas ao sol ou queimadas para preservação."},
+  {id:22,name:"Rio Eufrates",question:"Qual rio, junto ao Tigre, delimitava a região da Mesopotâmia e era fundamental para a agricultura e o comércio antigo?",answer:"O Rio Eufrates — o mais longo da região, percorrendo Turquia, Síria e Iraque, vital para a irrigação mesopotâmica."},
+  {id:23,name:"Acádios",question:"Qual povo semita conquistou as cidades-estado sumérias e fundou o primeiro grande império centralizado da história?",answer:"Os Acádios — povo de língua semita liderado por Sargão de Akkad, que dominou a Mesopotâmia por volta de 2300 a.C."},
+  {id:24,name:"Irrigação",question:"Qual técnica agrícola foi desenvolvida pelos mesopotâmicos para levar água dos rios até as plantações em regiões áridas?",answer:"A Irrigação — sistema de canais e represas que permitiu o cultivo em terras distantes dos rios."}
+];
+
+const SENHA='auroracarol';
+
+function verificarSenha(){
+  const val=document.getElementById('senhaInput').value;
+  const inp=document.getElementById('senhaInput');
+  if(val===SENHA){
+    document.getElementById('senha-screen').style.display='none';
+    const mc=document.getElementById('main-content');
+    mc.style.display='flex';
+    init();
+  } else {
+    inp.classList.remove('erro');
+    void inp.offsetWidth;
+    inp.classList.add('erro');
+    document.getElementById('senhaErro').style.display='block';
+    inp.value='';
+    setTimeout(()=>inp.classList.remove('erro'),400);
+  }
+}
+
+function init(){
+  loadState();renderTermsList();renderDrawnList();
+  document.getElementById('cntDrawn').textContent=called.length;
+  document.getElementById('drawBtn').disabled=called.length>=TERMS.length;
+  if(called.length>0)showTerm(called[called.length-1]);
+}
+
+let called=[],answerVisible=false;
+
+function saveState(){localStorage.setItem('bingo_called',JSON.stringify(called.map(t=>t.id)))}
+function loadState(){
+  try{
+    const ids=JSON.parse(localStorage.getItem('bingo_called')||'[]');
+    called=ids.map(id=>TERMS.find(t=>t.id===id)).filter(Boolean);
+  }catch(e){}
+}
+
+function renderTermsList(){
+  const el=document.getElementById('termsList');el.innerHTML='';
+  TERMS.forEach(t=>{
+    const drawn=called.find(c=>c.id===t.id);
+    const row=document.createElement('div');
+    row.className='t-row'+(drawn?' t-drawn':'');row.id='tr'+t.id;
+    row.innerHTML=`<div class="t-check">${drawn?'✓':''}</div><div class="t-name">${t.name}</div>`;
+    if(!drawn) row.onclick=()=>drawSpecific(t);
+    el.appendChild(row);
+  });
+}
+
+function renderDrawnList(){
+  const el=document.getElementById('drawnList');
+  if(!called.length){el.innerHTML='<div class="drawn-empty">Nenhum termo<br>sorteado ainda.</div>';return;}
+  el.innerHTML='';
+  [...called].reverse().forEach((t,i)=>{
+    const item=document.createElement('div');item.className='drawn-item';
+    item.innerHTML=`<div class="d-num">${called.length-i}</div><div class="d-name">${t.name}</div>`;
+    el.appendChild(item);
+  });
+}
+
+function showTerm(t){
+  answerVisible=false;
+  document.getElementById('emptySt').style.display='none';
+  const card=document.getElementById('qCard');
+  card.className='q-card';void card.offsetWidth;card.className='q-card visible';
+  document.getElementById('qcBadge').textContent=`Pergunta ${called.length} de ${TERMS.length}`;
+  document.getElementById('qcQuestion').textContent=t.question;
+  document.getElementById('qcTerm').textContent=t.name;
+  document.getElementById('qcAnsText').textContent=t.answer;
+  document.getElementById('qcAns').classList.remove('show');
+  document.getElementById('ansBtn').textContent='👁 Ver Resposta';
+}
+
+function drawTerm(){
+  const rem=TERMS.filter(t=>!called.find(c=>c.id===t.id));
+  if(!rem.length){document.getElementById('modalOv').classList.add('show');return;}
+  drawSpecific(rem[Math.floor(Math.random()*rem.length)]);
+}
+
+function drawSpecific(t){
+  if(called.find(c=>c.id===t.id))return;
+  called.push(t);saveState();
+  showTerm(t);
+  document.getElementById('cntDrawn').textContent=called.length;
+  document.getElementById('drawBtn').disabled=called.length>=TERMS.length;
+  renderDrawnList();
+  const row=document.getElementById('tr'+t.id);
+  if(row){row.className='t-row t-drawn';row.onclick=null;row.querySelector('.t-check').textContent='✓';}
+  if(called.length>=TERMS.length)setTimeout(()=>document.getElementById('modalOv').classList.add('show'),800);
+}
+
+function toggleAnswer(){
+  answerVisible=!answerVisible;
+  document.getElementById('qcAns').classList.toggle('show',answerVisible);
+  document.getElementById('ansBtn').textContent=answerVisible?'🙈 Ocultar Resposta':'👁 Ver Resposta';
+}
+
+function resetGame(){
+  if(!confirm('Reiniciar o jogo? Todos os sorteios serão apagados.'))return;
+  called=[];saveState();
+  document.getElementById('emptySt').style.display='block';
+  document.getElementById('qCard').className='q-card';
+  document.getElementById('cntDrawn').textContent='0';
+  document.getElementById('drawBtn').disabled=false;
+  renderDrawnList();renderTermsList();
+}
+
+function closeModal(){document.getElementById('modalOv').classList.remove('show')}
+
+// Foca o campo de senha ao carregar
+window.addEventListener('load',()=>document.getElementById('senhaInput').focus());
+</script>
+</body>
+</html>
