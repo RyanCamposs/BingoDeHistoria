@@ -136,9 +136,8 @@ header{background:linear-gradient(180deg,#251200,#180c00);border-bottom:3px soli
     <span class="senha-icon">🔐</span>
     <div class="senha-title">Área Restrita</div>
     <div class="senha-sub">Painel do Professor</div>
-    <input class="senha-input" id="senhaInput" type="password" placeholder="••••••••••••"
-      onkeydown="if(event.key==='Enter')verificarSenha()" autocomplete="off"/>
-    <button class="senha-btn" onclick="verificarSenha()">🏛️ Entrar</button>
+    <input class="senha-input" id="senhaInput" type="password" placeholder="••••••••••••" autocomplete="off"/>
+    <button class="senha-btn" id="senhaBtn">🏛️ Entrar</button>
     <div class="senha-erro-msg" id="senhaErro">Senha incorreta. Tente novamente.</div>
   </div>
 </div>
@@ -171,15 +170,15 @@ header{background:linear-gradient(180deg,#251200,#180c00);border-bottom:3px soli
       <div class="qc-line"></div>
       <div class="qc-question" id="qcQuestion">—</div>
       <div>
-        <button class="qc-ans-btn" id="ansBtn" onclick="toggleAnswer()">👁 Ver Resposta</button>
+        <button class="qc-ans-btn" id="ansBtn">👁 Ver Resposta</button>
         <div class="qc-ans" id="qcAns">
           <div id="qcTerm" style="font-family:'Cinzel Decorative',serif;font-size:1rem;color:#8b1a1a;margin-bottom:8px;"></div>
           <div id="qcAnsText"></div>
         </div>
       </div>
     </div>
-    <button class="btn-draw" id="drawBtn" onclick="drawTerm()">🎲 Sortear Próxima Pergunta</button>
-    <button class="btn-reset" onclick="resetGame()">↺ Reiniciar Jogo</button>
+    <button class="btn-draw" id="drawBtn">🎲 Sortear Próxima Pergunta</button>
+    <button class="btn-reset" id="resetBtn">↺ Reiniciar Jogo</button>
   </div>
   <div class="col-r">
     <div class="col-hdr">⟡ Todos os Termos ⟡</div>
@@ -193,7 +192,7 @@ header{background:linear-gradient(180deg,#251200,#180c00);border-bottom:3px soli
     <span class="m-icon">🎊</span>
     <div class="m-ttl">Fim de Jogo!</div>
     <div class="m-txt">Todas as 24 perguntas foram sorteadas.<br>Reinicie para jogar novamente!</div>
-    <button class="m-close" onclick="closeModal()">Fechar</button>
+    <button class="m-close" id="modalClose">Fechar</button>
   </div>
 </div>
 
@@ -209,56 +208,50 @@ const auth=getAuth(app);
 const gameRef=ref(db,'bingo/estado');
 
 const TERMS=[
-  {id:1,name:"Sumerianos",question:"Qual foi o povo considerado um dos primeiros a desenvolver a escrita e a viver em cidades organizadas na Mesopotâmia?",answer:"Os Sumerianos — povo que habitou o sul da Mesopotâmia e criou as primeiras cidades-estado, como Ur e Uruk."},
-  {id:2,name:"Código de Hamurabi",question:"Qual foi o conjunto de leis criado pelo rei babilônico que ficou conhecido pela ideia de punição proporcional ao crime?",answer:"O Código de Hamurabi — criado pelo rei Hamurabi da Babilônia, com 282 leis gravadas em pedra."},
-  {id:3,name:"Rio Tigre",question:"Qual rio, ao lado do Eufrates, formava a região fértil da Mesopotâmia, permitindo o desenvolvimento da agricultura?",answer:"O Rio Tigre — suas cheias periódicas, junto ao Eufrates, fertilizavam as terras do atual Iraque."},
-  {id:4,name:"Zigurate",question:"Como se chamavam as grandes torres em degraus construídas pelos mesopotâmicos como templos religiosos?",answer:"Zigurates — construções monumentais de vários andares, com templo no topo, dedicadas aos deuses."},
-  {id:5,name:"Escrita Cuneiforme",question:"Qual sistema de escrita, feito com estilete em tábuas de argila, foi desenvolvido pelos sumerianos?",answer:"A Escrita Cuneiforme — uma das primeiras formas de escrita da humanidade, com sinais em forma de cunha."},
-  {id:6,name:"Babilônia",question:"Qual grande cidade mesopotâmica foi capital de um dos maiores impérios da antiguidade e abrigava os famosos jardins suspensos?",answer:"A Babilônia — capital do Império Babilônico, famosa pelos Jardins Suspensos e pelo Código de Hamurabi."},
-  {id:7,name:"Deusa Ishtar",question:"Qual era a principal deusa da guerra e do amor venerada na Mesopotâmia, associada ao planeta Vênus?",answer:"Ishtar (ou Inanna) — deusa do amor, da fertilidade e da guerra, uma das mais importantes do panteão mesopotâmico."},
-  {id:8,name:"Cidades-Estado",question:"Como eram chamadas as unidades políticas independentes da Mesopotâmia, cada uma com seu próprio governo, leis e deuses?",answer:"Cidades-Estado — como Ur, Uruk e Lagash, governadas de forma autônoma com leis e deuses próprios."},
-  {id:9,name:"Epopeia de Gilgamesh",question:"Qual é considerado um dos mais antigos textos literários da humanidade, que narra as aventuras de um rei sumério em busca da imortalidade?",answer:"A Epopeia de Gilgamesh — poema épico sobre o rei Gilgamesh de Uruk, que também contém um relato de dilúvio."},
-  {id:10,name:"Lei do Talião",question:"Qual princípio jurídico presente no Código de Hamurabi estabelecia que a punição deveria ser igual ao dano causado?",answer:"A Lei do Talião — expressa na máxima 'olho por olho, dente por dente', visando punição proporcional."},
-  {id:11,name:"Balança da Justiça",question:"Qual símbolo representava o equilíbrio e a justiça nas culturas mesopotâmicas, presente em representações do deus Shamash?",answer:"A Balança da Justiça — símbolo de equilíbrio entre crimes e punições, associada ao deus sol Shamash."},
-  {id:12,name:"Jardins Suspensos",question:"Qual construção da Babilônia, atribuída ao rei Nabucodonosor II, era considerada uma das Sete Maravilhas do Mundo Antigo?",answer:"Os Jardins Suspensos da Babilônia — construídos para a rainha Amitis, saudosa de sua terra natal montanhosa."},
-  {id:13,name:"Deus Marduque",question:"Qual divindade se tornou o deus supremo do panteão babilônico e protetor da cidade da Babilônia?",answer:"Marduque (Marduk) — deus tutelar da Babilônia, rei dos deuses e criador do mundo na mitologia babilônica."},
-  {id:14,name:"Roda de Oração",question:"Qual invenção mesopotâmica, usada inicialmente para a olaria, depois transformou o transporte e a guerra na antiguidade?",answer:"A Roda — desenvolvida pelos sumerianos por volta de 3500 a.C., depois adaptada para carros de guerra e transporte."},
-  {id:15,name:"Astronomia",question:"Qual ciência foi amplamente desenvolvida pelos mesopotâmicos, que observavam os astros para prever estações, eclipses e criar calendários?",answer:"A Astronomia — os mesopotâmicos criaram um calendário lunar, identificaram planetas e fundaram a astrologia."},
-  {id:16,name:"Rei Sargão",question:"Qual rei acádio fundou o primeiro grande império da história, unificando as cidades-estado da Mesopotâmia?",answer:"Rei Sargão de Akkad — fundou o Império Acádio por volta de 2334 a.C., sendo o primeiro imperador da história."},
-  {id:17,name:"Escravidão",question:"Como era organizada a base do trabalho pesado nas sociedades mesopotâmicas, incluindo a construção de templos e palácios?",answer:"A Escravidão — escravos eram prisioneiros de guerra, devedores ou condenados que realizavam trabalhos pesados."},
-  {id:18,name:"Zigurate de Ur",question:"Qual é o zigurate mais bem preservado da Mesopotâmia, localizado na antiga cidade de Ur, dedicado ao deus-lua Nanna?",answer:"O Zigurate de Ur — construído por volta de 2100 a.C. pelo rei Ur-Nammu, dedicado ao deus Nanna (Sin)."},
-  {id:19,name:"Carruagens de Guerra",question:"Qual inovação militar mesopotâmica, puxada por cavalos ou burros, revolucionou os combates na antiguidade?",answer:"As Carruagens de Guerra — usadas pelos sumerianos e acádios, tornaram-se arma decisiva nas batalhas antigas."},
-  {id:20,name:"Deus Enki",question:"Qual divindade mesopotâmica era o deus da sabedoria, das águas doces e da criação, protetor da humanidade?",answer:"Enki (Ea) — deus da sabedoria e das águas subterrâneas, que advertiu Utnapishtim sobre o grande dilúvio."},
-  {id:21,name:"Tábuas de Argila",question:"Qual era o principal suporte de escrita usado na Mesopotâmia, onde eram registrados contratos, leis e literatura?",answer:"As Tábuas de Argila — gravadas com escrita cuneiforme e depois secas ao sol ou queimadas para preservação."},
-  {id:22,name:"Rio Eufrates",question:"Qual rio, junto ao Tigre, delimitava a região da Mesopotâmia e era fundamental para a agricultura e o comércio antigo?",answer:"O Rio Eufrates — o mais longo da região, percorrendo Turquia, Síria e Iraque, vital para a irrigação mesopotâmica."},
-  {id:23,name:"Acádios",question:"Qual povo semita conquistou as cidades-estado sumérias e fundou o primeiro grande império centralizado da história?",answer:"Os Acádios — povo de língua semita liderado por Sargão de Akkad, que dominou a Mesopotâmia por volta de 2300 a.C."},
-  {id:24,name:"Irrigação",question:"Qual técnica agrícola foi desenvolvida pelos mesopotâmicos para levar água dos rios até as plantações em regiões áridas?",answer:"A Irrigação — sistema de canais e represas que permitiu o cultivo em terras distantes dos rios."}
+  {id:1,name:"Irrigação",question:"Qual técnica desenvolvida pelos povos mesopotâmicos permitia levar a água dos rios para áreas distantes, garantindo a agricultura mesmo em períodos de seca?",answer:"Irrigação — sistema de canais e reservatórios que levava água dos rios Tigre e Eufrates até as plantações."},
+  {id:2,name:"Agricultura",question:"Ao controlar a água por meio de canais e reservatórios, os mesopotâmicos conseguiram produzir alimentos em maior quantidade. Que atividade econômica foi diretamente beneficiada por isso?",answer:"Agricultura — a irrigação permitiu cultivo abundante mesmo em períodos de seca, base da economia mesopotâmica."},
+  {id:3,name:"Diques",question:"Para evitar que as cheias descontroladas dos rios destruíssem plantações e cidades, os mesopotâmicos construíam estruturas de contenção de terra ao longo dos rios. Que estruturas eram essas?",answer:"Diques — barreiras de terra construídas às margens dos rios para controlar as cheias e proteger cidades e plantações."},
+  {id:4,name:"Politeísmo",question:"De que maneira a religião dos povos da Mesopotâmia se caracterizava quanto à crença em divindades, considerando a quantidade de deuses que faziam parte de sua cultura religiosa?",answer:"Politeísta — os mesopotâmicos acreditavam em múltiplos deuses, cada um associado a forças da natureza ou aspectos da vida."},
+  {id:5,name:"Sacerdotes",question:"Na sociedade mesopotâmica, quem desempenhava o papel de realizar os rituais religiosos e atuar como intermediário entre os deuses e a população nas práticas de culto?",answer:"Sacerdotes — líderes religiosos que realizavam rituais nos templos e serviam de intermediários entre os deuses e o povo."},
+  {id:6,name:"Zigurate",question:"Qual era a principal construção religiosa da Mesopotâmia, caracterizada por sua estrutura em forma de torre escalonada, utilizada como templo e símbolo da ligação entre o céu e a terra?",answer:"Zigurate — torre escalonada que servia como templo, representando a ligação entre os deuses (céu) e os humanos (terra)."},
+  {id:7,name:"Tigre e Eufrates",question:"O nome 'Mesopotâmia' tem origem grega e significa 'terra entre rios'. Essa denominação está relacionada à posição geográfica entre quais dois rios?",answer:"Rio Tigre e Rio Eufrates — os dois grandes rios que delimitavam a Mesopotâmia e fertilizavam suas terras."},
+  {id:8,name:"Transporte",question:"Além de fertilizar o solo, os rios também serviam como vias naturais que facilitavam o deslocamento de pessoas e mercadorias entre cidades. Que função econômica isso representa?",answer:"Transporte — os rios eram rotas naturais de circulação de pessoas e mercadorias, conectando as cidades mesopotâmicas."},
+  {id:9,name:"Terras Férteis",question:"Por quais motivos geográficos e econômicos a região da Mesopotâmia era constantemente disputada por diferentes povos ao longo da Antiguidade?",answer:"Terras férteis e recursos — a região entre os rios oferecia solo rico para a agricultura, atraindo diversos povos conquistadores."},
+  {id:10,name:"Perda de Domínio",question:"Qual era a principal consequência das conquistas territoriais na Mesopotâmia para os povos derrotados, especialmente em relação à sua autonomia política?",answer:"Perda de domínio político — os povos conquistados perdiam autonomia e passavam a ser controlados pelo império vencedor."},
+  {id:11,name:"Escrita Cuneiforme",question:"Qual foi a principal invenção desenvolvida pelos sumérios para registrar informações?",answer:"Escrita Cuneiforme — sistema de escrita em forma de cunha gravado em tábuas de argila, criado pelos sumérios."},
+  {id:12,name:"Argila",question:"A escrita cuneiforme utilizada pelos escribas no dia a dia era feita em que tipo de material?",answer:"Argila — as tábuas de argila eram o suporte de escrita dos mesopotâmicos, gravadas quando ainda moles e depois secas."},
+  {id:13,name:"Calendário",question:"Qual avanço desenvolvido pelos sumérios permitiu organizar a contagem do tempo ao longo dos dias e das estações, ajudando no planejamento da agricultura e da vida cotidiana?",answer:"Calendário — os sumérios criaram um calendário lunar que organizava o tempo e auxiliava no planejamento agrícola."},
+  {id:14,name:"Primeiras Cidades",question:"Quais foram as principais contribuições dos sumérios para a organização da vida urbana na Mesopotâmia, especialmente na criação dos primeiros centros urbanos estruturados?",answer:"Formação das primeiras cidades — os sumérios fundaram as primeiras cidades organizadas da história, com divisão de funções."},
+  {id:15,name:"Sistema Postal",question:"Qual sistema inovador criado pelos acádios permitia a troca de mensagens e informações entre diferentes regiões do império, facilitando a administração e o controle do território?",answer:"Sistema postal — rede de comunicação acádia que transportava mensagens entre regiões, facilitando o controle imperial."},
+  {id:16,name:"Astronomia",question:"Em qual área do conhecimento os acádios se destacaram ao observar os astros, como a Lua e as estrelas, para organizar o tempo e prever estações?",answer:"Astronomia — os acádios observavam sistematicamente os astros para criar calendários e prever eventos naturais."},
+  {id:17,name:"Primeiro Império",question:"Qual foi a principal contribuição política dos acádios para a Mesopotâmia ao unificarem várias cidades sob um único governo centralizado?",answer:"Formação do primeiro império — os acádios liderados por Sargão de Akkad criaram o primeiro império centralizado da história."},
+  {id:18,name:"Poder Real",question:"Para os acádios, o que as esculturas de leões nos palácios e templos representavam?",answer:"Poder — os leões simbolizavam a força e autoridade dos governantes acádios perante o povo e os inimigos."},
+  {id:19,name:"Código de Hamurábi",question:"O rei Hamurábi organizou um conjunto de leis escritas em pedra. Uma delas dizia: 'Se um homem destruir o olho de outro, terá seu olho destruído.' Como ficou conhecido esse conjunto de leis?",answer:"Código de Hamurábi — conjunto de 282 leis do rei Hamurábi gravadas em pedra, um dos primeiros sistemas jurídicos da história."},
+  {id:20,name:"Lei de Talião",question:"A ideia de que a punição deveria ser equivalente ao crime cometido, como 'olho por olho, dente por dente', ficou conhecida por qual princípio jurídico?",answer:"Lei de Talião — princípio de punição proporcional ao crime, presente no Código de Hamurábi e influente até hoje."},
+  {id:21,name:"Sistema Sexagesimal",question:"Além das leis, os babilônios desenvolveram um sistema matemático baseado no número 60, utilizado até hoje na divisão do tempo e dos ângulos. Em qual sistema do conhecimento eles se destacaram?",answer:"Sistema Sexagesimal — base 60 criada pelos babilônios, usada ainda hoje para medir horas, minutos, segundos e ângulos."},
+  {id:22,name:"Jardins Suspensos",question:"Qual obra da arquitetura babilônica, famosa por seus jardins em terraços elevados e sistema de irrigação, é considerada uma das maravilhas da Antiguidade?",answer:"Jardins Suspensos da Babilônia — construção monumental com jardins em terraços, considerada uma das Sete Maravilhas do Mundo Antigo."},
+  {id:23,name:"Militarismo",question:"Os assírios ficaram conhecidos por sua expansão territorial baseada em conquistas militares violentas e uso de estratégias de guerra. Qual característica define esse tipo de sociedade?",answer:"Militarismo — os assírios construíram um dos exércitos mais poderosos da Antiguidade, baseando sua expansão na força militar."},
+  {id:24,name:"Biblioteca de Nínive",question:"O rei assírio Assurbanipal organizou uma grande coleção de textos em tabuletas de argila, considerada uma das primeiras bibliotecas da história. Qual era o nome dessa biblioteca?",answer:"Biblioteca de Nínive — fundada pelo rei Assurbanipal, foi uma das primeiras e maiores bibliotecas da Antiguidade."}
 ];
 
 const SENHA='auroracarol';
 let called=[],answerVisible=false;
 
-window.verificarSenha=function(){
+function verificarSenha(){
   const val=document.getElementById('senhaInput').value;
   const inp=document.getElementById('senhaInput');
   if(val===SENHA){
     document.getElementById('senha-screen').style.display='none';
     document.getElementById('main-content').style.display='flex';
-    // Faz login anônimo no Firebase — necessário para ter permissão de escrita
-    signInAnonymously(auth)
-      .then(()=>init())
-      .catch(()=>init()); // fallback: tenta sem auth (leitura apenas)
+    signInAnonymously(auth).then(()=>init()).catch(()=>init());
   }else{
     inp.classList.remove('erro');void inp.offsetWidth;inp.classList.add('erro');
     document.getElementById('senhaErro').style.display='block';
     inp.value='';setTimeout(()=>inp.classList.remove('erro'),400);
   }
-};
-
-window.addEventListener('load',()=>document.getElementById('senhaInput').focus());
+}
 
 function init(){
-  // Escuta mudanças em tempo real → atualiza UI
   onValue(gameRef,snap=>{
     const ids=(snap.val()?.sorteados)||[];
     called=ids.map(id=>TERMS.find(t=>t.id===id)).filter(Boolean);
@@ -270,8 +263,6 @@ function init(){
     else{document.getElementById('emptySt').style.display='block';document.getElementById('qCard').className='q-card';}
     if(called.length>=TERMS.length) setTimeout(()=>document.getElementById('modalOv').classList.add('show'),600);
   });
-
-  // Indicador de conexão
   onValue(ref(db,'.info/connected'),snap=>{
     const ok=snap.val();
     document.getElementById('connDot').className='conn-dot '+(ok?'online':'offline');
@@ -315,30 +306,37 @@ function showTerm(t){
   document.getElementById('ansBtn').textContent='👁 Ver Resposta';
 }
 
-window.drawTerm=function(){
+function drawTerm(){
   const rem=TERMS.filter(t=>!called.find(c=>c.id===t.id));
   if(!rem.length){document.getElementById('modalOv').classList.add('show');return;}
   drawSpecific(rem[Math.floor(Math.random()*rem.length)]);
-};
+}
 
 function drawSpecific(t){
   if(called.find(c=>c.id===t.id))return;
   const newList=[...called.map(x=>x.id),t.id];
-  set(gameRef,{sorteados:newList}); // Firebase → todos os alunos atualizam automaticamente
+  set(gameRef,{sorteados:newList});
 }
 
-window.toggleAnswer=function(){
+function toggleAnswer(){
   answerVisible=!answerVisible;
   document.getElementById('qcAns').classList.toggle('show',answerVisible);
   document.getElementById('ansBtn').textContent=answerVisible?'🙈 Ocultar Resposta':'👁 Ver Resposta';
-};
+}
 
-window.resetGame=function(){
+function resetGame(){
   if(!confirm('Reiniciar? Todos os dispositivos conectados serão afetados!'))return;
   set(gameRef,{sorteados:[]});
-};
+}
 
-window.closeModal=function(){document.getElementById('modalOv').classList.remove('show')};
+// Registrar todos os eventos aqui — evita problemas com onclick em módulos ES
+document.getElementById('senhaBtn').addEventListener('click',verificarSenha);
+document.getElementById('senhaInput').addEventListener('keydown',e=>{if(e.key==='Enter')verificarSenha();});
+document.getElementById('senhaInput').focus();
+document.getElementById('drawBtn').addEventListener('click',drawTerm);
+document.getElementById('resetBtn').addEventListener('click',resetGame);
+document.getElementById('ansBtn').addEventListener('click',toggleAnswer);
+document.getElementById('modalClose').addEventListener('click',()=>document.getElementById('modalOv').classList.remove('show'));
 </script>
 </body>
 </html>
