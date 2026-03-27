@@ -51,14 +51,21 @@ header{position:relative;z-index:10;background:linear-gradient(180deg,#2a1000,#1
 .card-sub{font-size:.65rem;color:var(--bmd);letter-spacing:3px;text-transform:uppercase;margin-top:2px;font-weight:600}
 
 .bingo-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:5px;}
-.b-cell{background:linear-gradient(145deg,#fff8e8,var(--p));border:2px solid var(--pdd);border-radius:9px;padding:10px 6px;text-align:center;cursor:pointer;transition:all .22s;min-height:100px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;box-shadow:0 2px 6px rgba(0,0,0,.18),inset 0 1px 0 rgba(255,255,255,.7);user-select:none;position:relative;overflow:hidden;}
+.b-cell{background:linear-gradient(145deg,#fff8e8,var(--p));border:2px solid var(--pdd);border-radius:9px;padding:7px 5px;text-align:center;cursor:pointer;transition:all .22s;min-height:120px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;box-shadow:0 2px 6px rgba(0,0,0,.18),inset 0 1px 0 rgba(255,255,255,.7);user-select:none;position:relative;overflow:hidden;}
 .b-cell::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(255,255,255,.25) 0%,transparent 50%);pointer-events:none;}
 .b-cell:hover:not(.free){border-color:var(--g);box-shadow:0 4px 12px rgba(0,0,0,.28),0 0 8px rgba(201,144,42,.35);transform:translateY(-2px);}
 .b-cell.marked{background:linear-gradient(145deg,#8b1a1a,#5a0f0f);border-color:var(--g);color:var(--p);box-shadow:0 4px 16px rgba(139,26,26,.5);}
 .b-cell.free{background:linear-gradient(145deg,var(--g),var(--bmd));border-color:var(--bdk);cursor:default;font-family:'Cinzel Decorative',serif;font-size:.95rem;color:var(--bdk);box-shadow:0 4px 12px rgba(0,0,0,.4);}
 .b-cell.win-glow{animation:wG 1s infinite alternate}
 @keyframes wG{from{box-shadow:0 0 8px var(--g)}to{box-shadow:0 0 32px var(--gs),0 0 64px var(--g)}}
-.cell-term{font-size:clamp(.85rem,1.8vw,1.1rem);font-weight:800;color:var(--bdk);line-height:1.3;letter-spacing:.4px;}
+.cell-img-wrap{width:100%;height:52px;display:flex;align-items:center;justify-content:center;overflow:hidden;border-radius:5px;flex-shrink:0;}
+.cell-img{width:100%;height:52px;object-fit:cover;border-radius:5px;transition:transform .3s;}
+.b-cell:hover:not(.free) .cell-img{transform:scale(1.06)}
+.b-cell.marked .cell-img{filter:brightness(.7) sepia(.4)}
+.cell-emoji-fb{font-size:1.6rem;line-height:1}
+.cell-emoji{font-size:clamp(1.2rem,2.5vw,1.6rem);line-height:1;filter:drop-shadow(0 1px 2px rgba(0,0,0,.15));}
+.b-cell.marked .cell-emoji{filter:drop-shadow(0 1px 3px rgba(255,255,255,.2))}
+.cell-term{font-size:clamp(.62rem,1.2vw,.8rem);font-weight:800;color:var(--bdk);line-height:1.2;letter-spacing:.2px;}
 .b-cell.marked .cell-term{color:var(--p)}
 .cell-mark{position:absolute;top:3px;right:4px;font-size:.75rem;color:var(--gs);display:none;}
 .b-cell.marked .cell-mark{display:block}
@@ -111,8 +118,10 @@ header{position:relative;z-index:10;background:linear-gradient(180deg,#2a1000,#1
   .card-frame{padding:10px}
   .card-title{font-size:clamp(1rem,6vw,1.6rem)}
   .bingo-grid{gap:4px}
-  .b-cell{min-height:76px;padding:7px 4px}
-  .cell-term{font-size:.8rem;letter-spacing:0}
+  .b-cell{min-height:100px;padding:6px 4px;gap:4px}
+  .cell-img-wrap{height:44px}
+  .cell-img{height:44px}
+  .cell-term{font-size:.68rem}
   .b-cell.free{font-size:.85rem}
   .actions{flex-direction:column;gap:8px}
   .btn-bingo,.btn-new{width:100%}
@@ -123,8 +132,10 @@ header{position:relative;z-index:10;background:linear-gradient(180deg,#2a1000,#1
   .leg-item{font-size:.7rem}
 }
 @media(max-width:400px){
-  .b-cell{min-height:62px;padding:5px 2px}
-  .cell-term{font-size:.72rem}
+  .b-cell{min-height:82px;padding:4px 2px;gap:3px}
+  .cell-img-wrap{height:36px}
+  .cell-img{height:36px}
+  .cell-term{font-size:.58rem}
   .b-cell.free{font-size:.75rem}
   .bingo-grid{gap:3px}
   .card-frame{padding:8px}
@@ -234,6 +245,44 @@ const TERMS=[
   {id:24,name:"Biblioteca de Nínive",question:"O rei assírio Assurbanipal organizou uma grande coleção de textos em tabuletas de argila, considerada uma das primeiras bibliotecas da história. Qual era o nome dessa biblioteca?"}
 ];
 
+const IMGS={
+  "Irrigação":"img/irrigação.jpeg",
+  "Agricultura":"img/agricultura.jpeg",
+  "Diques":"img/diques.jpeg",
+  "Politeísmo":"img/politeismo.png",
+  "Sacerdotes":"img/sacerdote.jpeg",
+  "Zigurate":"img/zigurate.jpeg",
+  "Tigre e Eufrates":"img/tigre.jpeg",
+  "Transporte":"img/transporte.jpg",
+  "Terras Férteis":"img/ferteis.jpg",
+  "Perda de Domínio":"img/dominio.jpg",
+  "Escrita Cuneiforme":"img/escrita.jpeg",
+  "Argila":"img/argila.jpeg",
+  "Calendário":"img/calendario.jpg",
+  "Primeiras Cidades":"img/primeirascidades.jpg",
+  "Sistema Postal":"img/meopotamia.jpg",
+  "Astronomia":"img/astronomia.png",
+  "Primeiro Império":"img/primeiroimperio.jpg",
+  "Poder Real":"img/poder.jpeg",
+  "Código de Hamurábi":"img/hamurabi.jpeg",
+  "Lei de Talião":"img/lei.png ",
+  "Sistema Sexagesimal":"img/sistema.jpeg",
+  "Jardins Suspensos":"img/jardins.jpeg",
+  "Militarismo":"img/militarismo.png",
+  "Biblioteca de Nínive":"img/biblioteca.jpeg"
+};
+
+// Fallback emoji caso a imagem falhe
+const EMOJIS_FB={
+  "Irrigação":"🌊","Agricultura":"🌾","Diques":"🏗️","Politeísmo":"🛕",
+  "Sacerdotes":"🙏","Zigurate":"🏛️","Tigre e Eufrates":"🏞️","Transporte":"🚣",
+  "Terras Férteis":"🌱","Perda de Domínio":"⚔️","Escrita Cuneiforme":"📜",
+  "Argila":"🏺","Calendário":"📅","Primeiras Cidades":"🏙️","Sistema Postal":"📯",
+  "Astronomia":"🌙","Primeiro Império":"👑","Poder Real":"🦁",
+  "Código de Hamurábi":"⚖️","Lei de Talião":"👁️","Sistema Sexagesimal":"⏱️",
+  "Jardins Suspensos":"🌿","Militarismo":"🗡️","Biblioteca de Nínive":"📚"
+};
+
 let stuCard=[], marked=new Set(), calledIds=[];
 
 function shuffle(a){const r=[...a];for(let i=r.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[r[i],r[j]]=[r[j],r[i]]}return r}
@@ -252,8 +301,13 @@ function renderGrid(){
     const c=document.createElement('div');
     if(!t){c.className='b-cell free';c.innerHTML='<span>LIVRE</span>'}
     else{
+      const imgUrl=IMGS[t.name];
+      const fallback=EMOJIS_FB[t.name]||'📖';
+      const imgHtml=imgUrl
+        ? `<div class="cell-img-wrap"><img class="cell-img" src="${imgUrl}" alt="${t.name}" onerror="this.parentNode.innerHTML='<span class=cell-emoji-fb>${fallback}</span>'"></div>`
+        : `<div class="cell-img-wrap"><span class="cell-emoji-fb">${fallback}</span></div>`;
       c.className='b-cell'+(marked.has(i)?' marked':'');
-      c.innerHTML=`<span class="cell-mark">✓</span><div class="cell-term">${t.name}</div>`;
+      c.innerHTML=`<span class="cell-mark">✓</span>${imgHtml}<div class="cell-term">${t.name}</div>`;
       c.onclick=()=>{marked.has(i)?marked.delete(i):marked.add(i);renderGrid();};
     }
     g.appendChild(c);
