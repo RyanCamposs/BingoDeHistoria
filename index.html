@@ -150,13 +150,13 @@ header{position:relative;z-index:10;background:linear-gradient(180deg,#2a1000,#1
 
 <header>
   <div>
-    <div class="logo-title">📜 Bingo da Mesopotâmia</div>
+    <div class="logo-title">Bingo da Mesopotâmia</div>
     <div class="logo-sub">Cartela do Aluno</div>
   </div>
-  <div class="header-badge">🎓 Modo Aluno</div>
+  <div class="header-badge">Aluno</div>
   <div class="h-right">
     <div class="conn-status"><span class="conn-dot" id="connDot"></span><span id="connTxt">Conectando...</span></div>
-  <a href="professor.html" target="_blank" class="h-link-prof">👑 Professor</a>
+  <a href="professor.html" target="_blank" class="h-link-prof">Acesso do Professor</a>
   </div>
 </header>
 
@@ -193,7 +193,6 @@ header{position:relative;z-index:10;background:linear-gradient(180deg,#2a1000,#1
   <div class="legend">
     <div class="leg-item"><div class="leg-sw" style="background:linear-gradient(145deg,#fff8e8,var(--p));border-color:var(--pdd)"></div><span>Não marcado</span></div>
     <div class="leg-item"><div class="leg-sw" style="background:linear-gradient(145deg,#8b1a1a,#5a0f0f)"></div><span>Marcado</span></div>
-    <div class="leg-item"><div class="leg-sw" style="background:linear-gradient(145deg,var(--g),var(--bmd))"></div><span>LIVRE</span></div>
   </div>
 </div>
 
@@ -238,7 +237,8 @@ const TERMS=[
   {id:21,name:"Sistema Sexagesimal",question:"Além das leis, os babilônios desenvolveram um sistema matemático baseado no número 60, utilizado até hoje na divisão do tempo e dos ângulos. Em qual sistema do conhecimento eles se destacaram?"},
   {id:22,name:"Jardins Suspensos",question:"Qual obra da arquitetura babilônica, famosa por seus jardins em terraços elevados e sistema de irrigação, é considerada uma das maravilhas da Antiguidade?"},
   {id:23,name:"Militarismo",question:"Os assírios ficaram conhecidos por sua expansão territorial baseada em conquistas militares violentas e uso de estratégias de guerra. Qual característica define esse tipo de sociedade?"},
-  {id:24,name:"Biblioteca de Nínive",question:"O rei assírio Assurbanipal organizou uma grande coleção de textos em tabuletas de argila, considerada uma das primeiras bibliotecas da história. Qual era o nome dessa biblioteca?"}
+  {id:24,name:"Biblioteca de Nínive",question:"O rei assírio Assurbanipal organizou uma grande coleção de textos em tabuletas de argila, considerada uma das primeiras bibliotecas da história. Qual era o nome dessa biblioteca?"},
+  {id:25,name:"Tecnologia Militar",question:"Os assírios ficaram conhecidos por seu exército poderoso, que utilizava armas de ferro, carros de guerra e técnicas de cerco para conquistar cidades inimigas. Esse conjunto de recursos garantia qual tipo de vantagem militar?"}
 ];
 
 const IMGS={
@@ -265,7 +265,8 @@ const IMGS={
   "Sistema Sexagesimal":"img/sistema.jpeg",
   "Jardins Suspensos":"img/jardins.jpeg",
   "Militarismo":"img/militarismo.png",
-  "Biblioteca de Nínive":"img/biblioteca.jpeg"
+  "Biblioteca de Nínive":"img/biblioteca.jpeg",
+  "Tecnologia Militar":"img/militar.jpg"
 };
 
 // Fallback emoji caso a imagem falhe
@@ -276,7 +277,7 @@ const EMOJIS_FB={
   "Argila":"🏺","Calendário":"📅","Primeiras Cidades":"🏙️","Sistema Postal":"📯",
   "Astronomia":"🌙","Primeiro Império":"👑","Poder Real":"🦁",
   "Código de Hamurábi":"⚖️","Lei de Talião":"👁️","Sistema Sexagesimal":"⏱️",
-  "Jardins Suspensos":"🌿","Militarismo":"🗡️","Biblioteca de Nínive":"📚"
+  "Jardins Suspensos":"🌿","Militarismo":"🗡️","Biblioteca de Nínive":"📚","Tecnologia Militar":"⚔️"
 };
 
 let stuCard=[], marked=new Set(), calledIds=[];
@@ -284,9 +285,9 @@ let stuCard=[], marked=new Set(), calledIds=[];
 function shuffle(a){const r=[...a];for(let i=r.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[r[i],r[j]]=[r[j],r[i]]}return r}
 
 function genCard(){
-  const sh=shuffle(TERMS).slice(0,24);
-  stuCard=[...sh.slice(0,12),null,...sh.slice(12)];
-  marked=new Set([12]);
+  const sh=shuffle(TERMS).slice(0,25);
+  stuCard=[...sh];
+  marked=new Set();
   renderGrid();
 }
 window.genCard=genCard;
@@ -295,17 +296,14 @@ function renderGrid(){
   const g=document.getElementById('stuGrid');g.innerHTML='';
   stuCard.forEach((t,i)=>{
     const c=document.createElement('div');
-    if(!t){c.className='b-cell free';c.innerHTML='<span>LIVRE</span>'}
-    else{
-      const imgUrl=IMGS[t.name];
-      const fallback=EMOJIS_FB[t.name]||'📖';
-      const imgHtml=imgUrl
-        ? `<div class="cell-img-wrap"><img class="cell-img" src="${imgUrl}" alt="${t.name}" onerror="this.parentNode.innerHTML='<span class=cell-emoji-fb>${fallback}</span>'"></div>`
-        : `<div class="cell-img-wrap"><span class="cell-emoji-fb">${fallback}</span></div>`;
-      c.className='b-cell'+(marked.has(i)?' marked':'');
-      c.innerHTML=`<span class="cell-mark">✓</span>${imgHtml}<div class="cell-term">${t.name}</div>`;
-      c.onclick=()=>{marked.has(i)?marked.delete(i):marked.add(i);renderGrid();};
-    }
+    const imgUrl=IMGS[t.name];
+    const fallback=EMOJIS_FB[t.name]||'📖';
+    const imgHtml=imgUrl
+      ? `<div class="cell-img-wrap"><img class="cell-img" src="${imgUrl}" alt="${t.name}" onerror="this.parentNode.innerHTML='<span class=cell-emoji-fb>${fallback}</span>'"></div>`
+      : `<div class="cell-img-wrap"><span class="cell-emoji-fb">${fallback}</span></div>`;
+    c.className='b-cell'+(marked.has(i)?' marked':'');
+    c.innerHTML=`<span class="cell-mark">✓</span>${imgHtml}<div class="cell-term">${t.name}</div>`;
+    c.onclick=()=>{marked.has(i)?marked.delete(i):marked.add(i);renderGrid();};
     g.appendChild(c);
   });
 }
